@@ -5,6 +5,12 @@
 
 
 
+#define MAP_SIZE_PX_X 800
+#define MAP_SIZE_PX_Y 750
+
+
+
+
 
 
 

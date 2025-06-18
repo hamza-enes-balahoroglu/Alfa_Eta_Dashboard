@@ -27,6 +27,8 @@
 #include <string.h>
 #include <stdio.h>
 
+#define NEX_SCREEN_SIZE_X 800
+#define NEX_SCREEN_SIZE_Y 480
 
 /* Structure to hold pointers to all dashboard data values */
 typedef struct {
