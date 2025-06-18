@@ -62,7 +62,14 @@ const char *NEX_Int_Command[] = {
 	"xBMi.val=%d",      // Minimum battery voltage
 
 	/*--------------------- Temperature ---------------------*/
-	"xBtT.val=%d"  // Battery temperature
+	"xBtT.val=%d",  // Battery temperature
+
+
+	/*--------------------- Map ---------------------*/
+	"pMap.x=%d",  // Map x value
+	"pMap.y=%d",  // Map y value
+	"zIc.val=%d", // Icon direction
+	"nLap.val=%d" // Lap counter
 };
 
 
@@ -157,6 +164,25 @@ HAL_StatusTypeDef Dashboard_Refresh(void) {
         previousValues.batteryTemp = *dashboard->batteryTemp;
     }
 
+    if (*dashboard->mapPixelX != previousValues.mapPixelX) {
+        Send_Nextion_Int(SET_MAP_X, *dashboard->mapPixelX);
+        previousValues.mapPixelX = *dashboard->mapPixelX;
+    }
+
+    if (*dashboard->mapPixelY != previousValues.mapPixelY) {
+        Send_Nextion_Int(SET_MAP_Y, *dashboard->mapPixelY);
+        previousValues.mapPixelY = *dashboard->mapPixelY;
+    }
+
+    if (*dashboard->mapIconDirection != previousValues.mapIconDirection) {
+        Send_Nextion_Int(SET_MAP_ICON, *dashboard->mapIconDirection);
+        previousValues.mapIconDirection = *dashboard->mapIconDirection;
+    }
+
+    if (*dashboard->mapLap != previousValues.mapLap) {
+         Send_Nextion_Int(SET_MAP_LAP, *dashboard->mapLap);
+         previousValues.mapLap = *dashboard->mapLap;
+     }
     /* Gear */
     if (*dashboard->gear != previousValues.gear) {
         switch (*dashboard->gear) {
