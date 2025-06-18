@@ -37,6 +37,10 @@ typedef struct {
     int *maxVoltage;
     int *minVoltage;
     int *batteryTemp;
+    int *mapPixelX;
+    int *mapPixelY;
+    int *mapIconDirection;
+    int *mapLap;
     int *gear;         // 0: N, 1: D, 2: R
     int *handbrake;    // 0: Off, 1: On
     int *signalLeft;   // 0/1
@@ -56,6 +60,10 @@ typedef struct {
     int maxVoltage;
     int minVoltage;
     int batteryTemp;
+    int mapPixelX;
+    int mapPixelY;
+    int mapIconDirection;
+    int mapLap;
     int gear;
     int handbrake;
     int signalLeft;
@@ -100,15 +108,15 @@ extern const char *NEX_Command[];
 
 typedef enum {
 	/*--------------------- Speed Display ---------------------*/
-	SET_SPEED_COMMAND				= 0x00U,  // Speed number (e.g., RPM, km/h)
+	SET_SPEED_COMMAND				= 0x00U,  	// Speed number (e.g., RPM, km/h)
 
 	/*--------------------- Battery Display ---------------------*/
-	SET_BATTERY_NUMBER_COMMAND		= 0x01U,   // Battery value (number)
-	SET_BATTERY_PROGRESS_BAR_COMMAND= 0x02U, // Battery bar (percentage)
+	SET_BATTERY_NUMBER_COMMAND		= 0x01U,   	// Battery value (number)
+	SET_BATTERY_PROGRESS_BAR_COMMAND= 0x02U, 	// Battery bar (percentage)
 
 	/*--------------------- Power Display ---------------------*/
-	SET_KW_NUMBER_COMMAND			= 0x03U,           // Power in kW
-	SET_KW_PROGRESS_BAR_COMMAND		= 0x04U,     // Power as progress bar
+	SET_KW_NUMBER_COMMAND			= 0x03U,   	// Power in kW
+	SET_KW_PROGRESS_BAR_COMMAND		= 0x04U,   	// Power as progress bar
 
 	/*--------------------- Voltage Display ---------------------*/
 	SET_PACK_VOLTAGE				= 0x05U,	// Total battery voltage
@@ -116,8 +124,13 @@ typedef enum {
 	SET_MIN_VOLTAGE					= 0x07U,    // Minimum battery voltage
 
 	/*--------------------- Temperature ---------------------*/
-	SET_BATTERY_TEMPERATURE			= 0x08U   // Battery temperature
+	SET_BATTERY_TEMPERATURE			= 0x08U,   	// Battery temperature
 
+	/*--------------------- Temperature ---------------------*/
+	SET_MAP_X						= 0x09U,   	// Map x value
+	SET_MAP_Y						= 0x0AU,   	// Map y value
+	SET_MAP_ICON					= 0x0BU,
+	SET_MAP_LAP						= 0x0CU
 } NEX_Int_Command_ID;
 extern const char *NEX_Int_Command[];
 
@@ -125,8 +138,8 @@ extern const char *NEX_Int_Command[];
 /*--------------------- Progress Bar ---------------------*/
 typedef enum
 {
-   PROGRESS_BAR_REVERSE     		= 0x01U,  // Used to reverse the progress bar direction (100 to 0)
-   PROGRESS_BAR_NO_REVERSE			= 0x02U  // Used for normal progress bar direction (0 to 100)
+   PROGRESS_BAR_REVERSE     		= 0x01U,  	// Used to reverse the progress bar direction (100 to 0)
+   PROGRESS_BAR_NO_REVERSE			= 0x02U  	// Used for normal progress bar direction (0 to 100)
 }NEX_ProgressBar_Rotation;
 
 

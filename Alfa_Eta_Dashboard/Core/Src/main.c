@@ -22,6 +22,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "dashboard_controls.h"
+#include "geo_to_pixel.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -53,6 +54,10 @@ packVoltage,
 maxVoltage,
 minVoltage,
 batteryTemp,
+mapPixelX,
+mapPixelY,
+mapIconDirection,
+mapLap,
 gear,
 handbrake,
 signalLeft ,
@@ -113,20 +118,24 @@ int main(void)
   Connection_Check = Dashboard_Init(&huart2);
 
   NEX_Data dashboardValues = {
-      .speed = &speed,
-      .batteryValue = &batteryValue,
-      .powerKW = &powerKW,
-      .packVoltage = &packVoltage,
-      .maxVoltage = &maxVoltage,
-      .minVoltage = &minVoltage,
-      .batteryTemp = &batteryTemp,
-      .gear = &gear,
-      .handbrake = &handbrake,
-      .signalLeft = &signalLeft,
-      .signalRight = &signalRight,
-      .connWarn = &connWarn,
-      .battWarn = &battWarn,
-      .lights = &lights
+      .speed 			=	&speed,
+      .batteryValue		= 	&batteryValue,
+      .powerKW 			= 	&powerKW,
+      .packVoltage 		= 	&packVoltage,
+      .maxVoltage 		= 	&maxVoltage,
+      .minVoltage 		= 	&minVoltage,
+      .batteryTemp 		= 	&batteryTemp,
+	  .mapPixelX 		= 	&mapPixelX,
+	  .mapPixelY 		= 	&mapPixelY,
+	  .mapIconDirection = 	&mapIconDirection,
+	  .mapLap 			=	&mapLap,
+      .gear 			= 	&gear,
+      .handbrake 		= 	&handbrake,
+      .signalLeft 		= 	&signalLeft,
+      .signalRight 		= 	&signalRight,
+      .connWarn 		= 	&connWarn,
+      .battWarn 		= 	&battWarn,
+      .lights 			= 	&lights
   };
 
   Dashboard_Bind(&dashboardValues);
