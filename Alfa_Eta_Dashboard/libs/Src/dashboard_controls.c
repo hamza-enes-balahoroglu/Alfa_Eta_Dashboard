@@ -14,7 +14,7 @@
 
 #include "dashboard_controls.h"
 
-static const char *NEX_Command[] = {
+const char *NEX_Command[] = {
 	/*--------------------- Static Nextion Commands ---------------------*/
 	"con=1",  // Handshake command to confirm connection
 	/*--------------------- Gear Display ---------------------*/
@@ -44,7 +44,7 @@ static const char *NEX_Command[] = {
 };
 
 
-static const char *NEX_Int_Command[] = {
+const char *NEX_Int_Command[] = {
 	/*--------------------- Speed Display ---------------------*/
 	"nSd.val=%d",  // Speed number (e.g., RPM, km/h)
 
@@ -163,24 +163,24 @@ HAL_StatusTypeDef Dashboard_Refresh(void) {
         previousValues.batteryTemp = *dashboard->batteryTemp;
     }
 
-    if (*dashboard->map->PixelX != previousValues.mapData.PixelX) {
-        Send_Nextion_Int(SET_MAP_X, *dashboard->map->PixelX);
-        previousValues.mapData.PixelX = *dashboard->map->PixelX;
+    if (dashboard->mapData->PixelX != previousValues.mapData.PixelX) {
+        Send_Nextion_Int(SET_MAP_X, dashboard->mapData->PixelX);
+        previousValues.mapData.PixelX = dashboard->mapData->PixelX;
     }
 
-    if (*dashboard->map->PixelY != previousValues.mapData.PixelY) {
-        Send_Nextion_Int(SET_MAP_Y, *dashboard->map->PixelY);
-        previousValues.mapData.PixelY = *dashboard->map->PixelY;
+    if (dashboard->mapData->PixelY != previousValues.mapData.PixelY) {
+        Send_Nextion_Int(SET_MAP_Y, dashboard->mapData->PixelY);
+        previousValues.mapData.PixelY = dashboard->mapData->PixelY;
     }
 
-    if (*dashboard->map->IconDirection != previousValues.mapData.IconDirection) {
-        Send_Nextion_Int(SET_MAP_ICON, *dashboard->map->IconDirection);
-        previousValues.mapData.IconDirection = *dashboard->map->IconDirection;
+    if (dashboard->mapData->IconAngle != previousValues.mapData.IconAngle) {
+        Send_Nextion_Int(SET_MAP_ICON, dashboard->mapData->IconAngle);
+        previousValues.mapData.IconAngle = dashboard->mapData->IconAngle;
     }
 
-    if (*dashboard->map->Lap != previousValues.mapData.Lap) {
-        Send_Nextion_Int(SET_MAP_LAP, *dashboard->map->Lap);
-        previousValues.mapData.Lap = *dashboard->map->Lap;
+    if (dashboard->mapData->Lap != previousValues.mapData.Lap) {
+        Send_Nextion_Int(SET_MAP_LAP, dashboard->mapData->Lap);
+        previousValues.mapData.Lap = dashboard->mapData->Lap;
     }
 
     /* Gear */
