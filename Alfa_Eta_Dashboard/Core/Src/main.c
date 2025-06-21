@@ -44,9 +44,11 @@
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
-HAL_StatusTypeDef Connection_Check;
 int count = 0;
 
+
+
+HAL_StatusTypeDef Connection_Check;
 int speed,
 batteryValue,
 powerKW,
