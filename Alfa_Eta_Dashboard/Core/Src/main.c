@@ -54,10 +54,6 @@ packVoltage,
 maxVoltage,
 minVoltage,
 batteryTemp,
-mapPixelX,
-mapPixelY,
-mapIconDirection,
-mapLap,
 gear,
 handbrake,
 signalLeft ,
@@ -65,6 +61,26 @@ signalRight,
 connWarn,
 battWarn,
 lights;
+
+MapOffset MapData;
+
+NEX_Data dashboardValues = {
+     .speed 			=	&speed,
+     .batteryValue		= 	&batteryValue,
+     .powerKW 			= 	&powerKW,
+     .packVoltage 		= 	&packVoltage,
+     .maxVoltage 		= 	&maxVoltage,
+     .minVoltage 		= 	&minVoltage,
+     .batteryTemp 		= 	&batteryTemp,
+	 .mapData 			=	&MapData,
+     .gear 				= 	&gear,
+     .handbrake 		= 	&handbrake,
+     .signalLeft 		= 	&signalLeft,
+     .signalRight 		= 	&signalRight,
+     .connWarn 		= 	&connWarn,
+     .battWarn 		= 	&battWarn,
+     .lights 			= 	&lights
+ };
 
 /* USER CODE END PV */
 
@@ -116,27 +132,6 @@ int main(void)
 
   // IMPOTANT : Call after UART initialization (e.g., MX_USART2_UART_Init())
   Connection_Check = Dashboard_Init(&huart2);
-
-  NEX_Data dashboardValues = {
-      .speed 			=	&speed,
-      .batteryValue		= 	&batteryValue,
-      .powerKW 			= 	&powerKW,
-      .packVoltage 		= 	&packVoltage,
-      .maxVoltage 		= 	&maxVoltage,
-      .minVoltage 		= 	&minVoltage,
-      .batteryTemp 		= 	&batteryTemp,
-	  .mapPixelX 		= 	&mapPixelX,
-	  .mapPixelY 		= 	&mapPixelY,
-	  .mapIconDirection = 	&mapIconDirection,
-	  .mapLap 			=	&mapLap,
-      .gear 			= 	&gear,
-      .handbrake 		= 	&handbrake,
-      .signalLeft 		= 	&signalLeft,
-      .signalRight 		= 	&signalRight,
-      .connWarn 		= 	&connWarn,
-      .battWarn 		= 	&battWarn,
-      .lights 			= 	&lights
-  };
 
   Dashboard_Bind(&dashboardValues);
 
