@@ -24,6 +24,7 @@
 #define DASHBOARD_CONTROLS
 
 #include "stm32f4xx_hal.h"
+#include "geo_to_pixel.h"
 #include <string.h>
 #include <stdio.h>
 
@@ -39,10 +40,7 @@ typedef struct {
     int *maxVoltage;
     int *minVoltage;
     int *batteryTemp;
-    int *mapPixelX;
-    int *mapPixelY;
-    int *mapIconDirection;
-    int *mapLap;
+    MapOffset *mapData;
     int *gear;         // 0: N, 1: D, 2: R
     int *handbrake;    // 0: Off, 1: On
     int *signalLeft;   // 0/1
@@ -62,10 +60,7 @@ typedef struct {
     int maxVoltage;
     int minVoltage;
     int batteryTemp;
-    int mapPixelX;
-    int mapPixelY;
-    int mapIconDirection;
-    int mapLap;
+    MapOffset mapData;
     int gear;
     int handbrake;
     int signalLeft;
