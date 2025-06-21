@@ -14,7 +14,7 @@
 
 #include "dashboard_controls.h"
 
-const char *NEX_Command[] = {
+static const char *NEX_Command[] = {
 	/*--------------------- Static Nextion Commands ---------------------*/
 	"con=1",  // Handshake command to confirm connection
 	/*--------------------- Gear Display ---------------------*/
@@ -44,7 +44,7 @@ const char *NEX_Command[] = {
 };
 
 
-const char *NEX_Int_Command[] = {
+static const char *NEX_Int_Command[] = {
 	/*--------------------- Speed Display ---------------------*/
 	"nSd.val=%d",  // Speed number (e.g., RPM, km/h)
 
@@ -74,7 +74,7 @@ const char *NEX_Int_Command[] = {
 
 
 /* Global pointer to UART handle used for communication */
-UART_HandleTypeDef *_uart;
+static UART_HandleTypeDef *_uart;
 
 /* Global pointer to binded data */
 static NEX_Data *dashboard = NULL;
@@ -83,7 +83,7 @@ static NEX_Data *dashboard = NULL;
 static NEX_CachedData previousValues = {0};
 
 /* 3-byte terminator required for every Nextion command */
-const uint8_t COMMAND_END[3] = {0xFF, 0xFF, 0xFF};
+static const uint8_t COMMAND_END[3] = {0xFF, 0xFF, 0xFF};
 
 /**
  * @brief Initializes the connection with the Nextion display (includes handshake)
@@ -118,8 +118,7 @@ void Dashboard_Bind(NEX_Data *data) {
   */
 HAL_StatusTypeDef Dashboard_Refresh(void) {
 
-    //if (dashboard == NULL || Nextion_Handshake(100)==HAL_ERROR)
-	//	return HAL_ERROR;
+
 
     /* Numeric values */
     if (*dashboard->speed != previousValues.speed) {
@@ -164,25 +163,26 @@ HAL_StatusTypeDef Dashboard_Refresh(void) {
         previousValues.batteryTemp = *dashboard->batteryTemp;
     }
 
-    if (*dashboard->mapPixelX != previousValues.mapPixelX) {
-        Send_Nextion_Int(SET_MAP_X, *dashboard->mapPixelX);
-        previousValues.mapPixelX = *dashboard->mapPixelX;
+    if (*dashboard->map->PixelX != previousValues.mapData.PixelX) {
+        Send_Nextion_Int(SET_MAP_X, *dashboard->map->PixelX);
+        previousValues.mapData.PixelX = *dashboard->map->PixelX;
     }
 
-    if (*dashboard->mapPixelY != previousValues.mapPixelY) {
-        Send_Nextion_Int(SET_MAP_Y, *dashboard->mapPixelY);
-        previousValues.mapPixelY = *dashboard->mapPixelY;
+    if (*dashboard->map->PixelY != previousValues.mapData.PixelY) {
+        Send_Nextion_Int(SET_MAP_Y, *dashboard->map->PixelY);
+        previousValues.mapData.PixelY = *dashboard->map->PixelY;
     }
 
-    if (*dashboard->mapIconDirection != previousValues.mapIconDirection) {
-        Send_Nextion_Int(SET_MAP_ICON, *dashboard->mapIconDirection);
-        previousValues.mapIconDirection = *dashboard->mapIconDirection;
+    if (*dashboard->map->IconDirection != previousValues.mapData.IconDirection) {
+        Send_Nextion_Int(SET_MAP_ICON, *dashboard->map->IconDirection);
+        previousValues.mapData.IconDirection = *dashboard->map->IconDirection;
     }
 
-    if (*dashboard->mapLap != previousValues.mapLap) {
-         Send_Nextion_Int(SET_MAP_LAP, *dashboard->mapLap);
-         previousValues.mapLap = *dashboard->mapLap;
-     }
+    if (*dashboard->map->Lap != previousValues.mapData.Lap) {
+        Send_Nextion_Int(SET_MAP_LAP, *dashboard->map->Lap);
+        previousValues.mapData.Lap = *dashboard->map->Lap;
+    }
+
     /* Gear */
     if (*dashboard->gear != previousValues.gear) {
         switch (*dashboard->gear) {
