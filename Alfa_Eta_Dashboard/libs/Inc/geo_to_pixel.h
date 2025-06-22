@@ -46,7 +46,7 @@ void Geo_To_Pixel_Init(UART_HandleTypeDef *uart, MapOffset *mapData);
 
 void Read_GPS_Location(void);
 
-float NMEA_To_Decimal(char *nmea, char hemisphere);
+float NMEA_To_Decimal(char *nmea);
 
 void Calculate_Geo_To_Pixel(void);
 

@@ -76,8 +76,6 @@ void Read_GPS_Location(void) {
             	break;
             }
 
-
-
             token = strtok(NULL, ",");
         }
         actualLat = latitude;
@@ -95,8 +93,6 @@ float NMEA_To_Decimal(char *nmea, char hemisphere) {
     deg = (int)(val / 100);
     min = val - (deg * 100);
     float decimal = deg + (min / 60.0);
-    if (hemisphere == 'S' || hemisphere == 'W')
-        decimal = -decimal;
     return decimal;
 }
 
