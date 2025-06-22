@@ -171,9 +171,8 @@ int main(void)
 
 	  Run_GeoPipeline();
 
-	  memset(gps_test, 0, GPS_BUFFER_SIZE);
-	  HAL_UART_Receive(&huart3, (uint8_t *)gps_test, GPS_BUFFER_SIZE, 2000);
-
+	  // memset(gps_test, 0, GPS_BUFFER_SIZE);
+	  // HAL_UART_Receive(&huart3, (uint8_t *)gps_test, GPS_BUFFER_SIZE, 2000);
 
 	  Dashboard_Refresh();
 
