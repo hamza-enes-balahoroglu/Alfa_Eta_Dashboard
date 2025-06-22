@@ -36,7 +36,7 @@ typedef struct {
 } MapOffset;
 
 
-void Test(char *buf);
+void Test(float *lon, float *lat, char *test);
 
 
 

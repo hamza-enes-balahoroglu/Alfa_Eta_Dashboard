@@ -42,10 +42,15 @@
 
 /* Private variables ---------------------------------------------------------*/
 UART_HandleTypeDef huart2;
+UART_HandleTypeDef huart3;
 
 /* USER CODE BEGIN PV */
 int count = 0;
 
+float lon;
+float lat;
+char gps_test[GPS_BUFFER_SIZE];
+char gps_storage[100];
 
 
 HAL_StatusTypeDef Connection_Check;
@@ -79,8 +84,8 @@ NEX_Data dashboardValues = {
      .handbrake 		= 	&handbrake,
      .signalLeft 		= 	&signalLeft,
      .signalRight 		= 	&signalRight,
-     .connWarn 		= 	&connWarn,
-     .battWarn 		= 	&battWarn,
+     .connWarn 			= 	&connWarn,
+     .battWarn 			= 	&battWarn,
      .lights 			= 	&lights
  };
 
@@ -90,6 +95,7 @@ NEX_Data dashboardValues = {
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
+static void MX_USART3_UART_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -130,12 +136,16 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART2_UART_Init();
+  MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
 
   // IMPOTANT : Call after UART initialization (e.g., MX_USART2_UART_Init())
   Connection_Check = Dashboard_Init(&huart2);
+  Geo_To_Pixel_Init(&huart3, &MapData);
+  Test(&lon, &lat, gps_storage);
 
   Dashboard_Bind(&dashboardValues);
+
 
   /* USER CODE END 2 */
 
@@ -143,11 +153,12 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  batteryValue = 50;
+
+	  batteryValue = 10;
 	  powerKW = 3;
 	  packVoltage = 5220;
-	  maxVoltage = 375;
-	  minVoltage = 360;
+	  maxVoltage = 475;
+	  minVoltage = 160;
 	  batteryTemp = 2750;
 	  gear = 2;
 	  handbrake = 1;
@@ -155,15 +166,18 @@ int main(void)
 	  connWarn = 1;
 	  battWarn = 1;
 	  lights = 1;
-	  for(int i = 0; i<100; i++){
-		  speed = i;
-		  Dashboard_Refresh();
-		  HAL_Delay(10);
-	  }
+	  speed = 10;
 
 
+	  Run_GeoPipeline();
+
+	  memset(gps_test, 0, GPS_BUFFER_SIZE);
+	  HAL_UART_Receive(&huart3, (uint8_t *)gps_test, GPS_BUFFER_SIZE, 2000);
 
 
+	  Dashboard_Refresh();
+
+	  HAL_Delay(300);
 
     /* USER CODE END WHILE */
 
@@ -228,7 +242,7 @@ static void MX_USART2_UART_Init(void)
 
   /* USER CODE END USART2_Init 1 */
   huart2.Instance = USART2;
-  huart2.Init.BaudRate = 9600;
+  huart2.Init.BaudRate = 115200;
   huart2.Init.WordLength = UART_WORDLENGTH_8B;
   huart2.Init.StopBits = UART_STOPBITS_1;
   huart2.Init.Parity = UART_PARITY_NONE;
@@ -246,6 +260,39 @@ static void MX_USART2_UART_Init(void)
 }
 
 /**
+  * @brief USART3 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_USART3_UART_Init(void)
+{
+
+  /* USER CODE BEGIN USART3_Init 0 */
+
+  /* USER CODE END USART3_Init 0 */
+
+  /* USER CODE BEGIN USART3_Init 1 */
+
+  /* USER CODE END USART3_Init 1 */
+  huart3.Instance = USART3;
+  huart3.Init.BaudRate = 9600;
+  huart3.Init.WordLength = UART_WORDLENGTH_8B;
+  huart3.Init.StopBits = UART_STOPBITS_1;
+  huart3.Init.Parity = UART_PARITY_NONE;
+  huart3.Init.Mode = UART_MODE_TX_RX;
+  huart3.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart3.Init.OverSampling = UART_OVERSAMPLING_16;
+  if (HAL_UART_Init(&huart3) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN USART3_Init 2 */
+
+  /* USER CODE END USART3_Init 2 */
+
+}
+
+/**
   * @brief GPIO Initialization Function
   * @param None
   * @retval None
@@ -259,6 +306,7 @@ static void MX_GPIO_Init(void)
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOH_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /* USER CODE BEGIN MX_GPIO_Init_2 */
 

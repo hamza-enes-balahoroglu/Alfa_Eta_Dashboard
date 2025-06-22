@@ -2,7 +2,7 @@
 
 static UART_HandleTypeDef *_uart = NULL;
 
-char gps_buffer[GPS_BUFFER_SIZE];
+char *gps_buffer;
 
 static MapOffset *_mapData = NULL;
 static MapOffset _mapCachedData = {
@@ -35,45 +35,57 @@ void Run_GeoPipeline(void){
 
 static float *_lon = NULL;
 static float *_lat = NULL;
-static char *_buf = NULL;
-void Test(char *buf){
-	_buf = buf;
+
+void Test(float *lon, float *lat, char *test){
+	_lon=lon;
+	_lat=lat;
+	gps_buffer=test;
 }
 
 void Read_GPS_Location(void) {
 	float latitude,longitude;
     memset(gps_buffer, 0, GPS_BUFFER_SIZE);
     HAL_UART_Receive(_uart, (uint8_t *)gps_buffer, GPS_BUFFER_SIZE, 1000);
-    _buf = gps_buffer;
-    if (strstr(gps_buffer, "$GPGGA")) {
+
+    if (strstr(gps_buffer, "$GNRMC")) {
         char *token;
-        int field = 0;
 
         token = strtok(gps_buffer, ",");
         while (token != NULL) {
-            field++;
 
-            if (field == 3) {
-                latitude = NMEA_To_Decimal(token, 'N'); // default 'N'
-            }
-            else if (field == 4) {
-                if (token[0] == 'S')
-                    latitude = -latitude;
-            }
-            else if (field == 5) {
+
+            if (strstr(token, "$GNRMC")){
+
+            	token = strtok(NULL, ",");
+            	token = strtok(NULL, ",");
+            	token = strtok(NULL, ",");
+
+            	latitude = NMEA_To_Decimal(token, 'N'); // default 'N'
+
+            	token = strtok(NULL, ",");
+
+            	if (token[0] == 'S')
+            		latitude = -latitude;
+
+            	token = strtok(NULL, ",");
             	longitude = NMEA_To_Decimal(token, 'E'); // default 'E'
+
+            	token = strtok(NULL, ",");
+            		if (token[0] == 'W')
+            			longitude = -longitude;
+            	break;
             }
-            else if (field == 6) {
-                if (token[0] == 'W')
-                    longitude = -longitude;
-            }
+
+
 
             token = strtok(NULL, ",");
         }
         actualLat = latitude;
         actualLon = longitude;
+
         if (_lat != NULL) *_lat = latitude;
         if (_lon != NULL) *_lon = longitude;
+
     }
 }
 
@@ -92,7 +104,7 @@ void Calculate_Geo_To_Pixel(void){
 	float mappedXf = Map_Float(actualLon, NW_lon, SE_lon, 0.00f , MAP_X_SIZE);
 	int mappedX = (int)mappedXf;
 
-	float mappedYf = Map_Float(actualLat, NW_lat, SE_lat, 0.00f, MAP_Y_SIZE);
+	float mappedYf = Map_Float(actualLat, SE_lat, NW_lat, 0.00f, MAP_Y_SIZE);
 	int mappedY = (int)mappedYf;
 
 	Get_Map_Draw_Position(mappedX, mappedY);
