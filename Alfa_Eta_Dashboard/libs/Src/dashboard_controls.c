@@ -279,9 +279,9 @@ HAL_StatusTypeDef Send_Nextion_Progress_Bar(NEX_Int_Command_ID cmdID, int val, i
     if (minVal <= val && val <=maxVal){
     	int mapVal;
     	if(reverseProgressBar == PROGRESS_BAR_REVERSE)
-    		mapVal = 100 - Map_Int(val, maxVal, minVal, 100, 0);  // Map to 0-100 range
+    		mapVal = 100 - Map_Int(val, minVal, maxVal, 0, 100);  // Map to 0-100 range
     	else if(reverseProgressBar == PROGRESS_BAR_NO_REVERSE)
-    		mapVal = Map_Int(val, maxVal, minVal, 100, 0);
+    		mapVal = Map_Int(val, minVal, maxVal, 0, 100);
 
         Send_Nextion_Int(cmdID, (uint8_t)mapVal);
         return HAL_OK;
@@ -300,12 +300,18 @@ HAL_StatusTypeDef Send_Nextion_Progress_Bar(NEX_Int_Command_ID cmdID, int val, i
  * @param refMinValue: Target minimum
  * @retval Mapped output value
  */
-int Map_Int(uint32_t input, uint32_t maxValue, uint32_t minValue, uint32_t refMaxValue, uint32_t refMinValue)
+int Map_Int(int input, int in_min, int in_max, int out_min, int out_max)
 {
-    uint32_t input_range = maxValue - minValue + 1;
-    uint32_t ref_range = refMaxValue - refMinValue + 1;
+    //uint32_t input_range = in_max - in_min + 1;
+    //uint32_t ref_range = out_max - out_min + 1;
 
-    return ((ref_range * (input - minValue)) / input_range) + refMinValue;
+    //return ((ref_range * (input - in_min)) / input_range) + out_min;
+
+
+    int input_range = in_max - in_min;
+    int output_range = out_max - out_min;
+
+    return ((input - in_min) * output_range) / input_range + out_min;
 }
 
 /**

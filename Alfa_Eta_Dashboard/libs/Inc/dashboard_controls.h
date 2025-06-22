@@ -218,6 +218,6 @@ void Command_Terminator(void);
  * @param refMinValue: Target range minimum.
  * @return Mapped integer result.
  */
-int Map(uint32_t input, uint32_t maxValue, uint32_t minValue, uint32_t refMaxValue, uint32_t refMinValue);
+int Map_Int(int input, int in_min, int in_max, int out_min, int out_max);
 
 #endif // DASHBOARD_CONTROLS
