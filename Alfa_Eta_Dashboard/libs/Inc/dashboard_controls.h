@@ -148,13 +148,13 @@ typedef enum
  * @retval HAL status.
  * @note Must be called after MX_USARTx_UART_Init().
  */
-HAL_StatusTypeDef Dashboard_Init(UART_HandleTypeDef *uart);
+HAL_StatusTypeDef Dashboard_Init(UART_HandleTypeDef *uart, NEX_Data *data);
 
 /**
  * @brief Initializes the dashboard pointer map (must be called once after setting up values).
  * @param data: Pointer to a structure containing all relevant value addresses.
  */
-void Dashboard_Bind(NEX_Data *data);
+void Dashboard_Bind(UART_HandleTypeDef *uart, NEX_Data *data);
 
 /**
  * @brief Refreshes the dashboard screen with the latest data.

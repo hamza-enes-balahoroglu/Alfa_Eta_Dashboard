@@ -1,6 +1,6 @@
 /**
  ******************************************************************************
- * @file           : dashboard_controls.c
+ * @file           : Dashboard_controls.c
  * @brief          : Sending Nextion commands via UART
  ******************************************************************************
  * @details
@@ -77,10 +77,10 @@ const char *NEX_Int_Command[] = {
 static UART_HandleTypeDef *_uart;
 
 /* Global pointer to binded data */
-static NEX_Data *dashboard = NULL;
+static NEX_Data *_dashboard = NULL;
 
 /* Holds previous values to compare and avoid redundant updates */
-static NEX_CachedData previousValues = {0};
+static NEX_CachedData _previousValues = {0};
 
 /* 3-byte terminator required for every Nextion command */
 static const uint8_t COMMAND_END[3] = {0xFF, 0xFF, 0xFF};
@@ -95,8 +95,9 @@ static const uint8_t COMMAND_END[3] = {0xFF, 0xFF, 0xFF};
  * @param uart: Pointer to UART interface to use
  * @retval HAL_OK or HAL_ERROR depending on handshake result
  */
-HAL_StatusTypeDef Dashboard_Init(UART_HandleTypeDef *uart){
-    _uart = uart;
+HAL_StatusTypeDef Dashboard_Init(UART_HandleTypeDef *uart, NEX_Data *data){
+
+    Dashboard_Bind(uart, data);
     return Nextion_Handshake(2000); // 2 seconds timeout for handshake
 }
 
@@ -106,8 +107,9 @@ HAL_StatusTypeDef Dashboard_Init(UART_HandleTypeDef *uart){
   * @param  data: Pointer to a user-defined DashboardData structure with field addresses set.
   * @retval None
   */
-void Dashboard_Bind(NEX_Data *data) {
-    dashboard = data;
+void Dashboard_Bind(UART_HandleTypeDef *uart, NEX_Data *data){
+	_uart = uart;
+    _dashboard = data;
 }
 
 /**
@@ -121,107 +123,107 @@ HAL_StatusTypeDef Dashboard_Refresh(void) {
 
 
     /* Numeric values */
-    if (*dashboard->speed != previousValues.speed) {
-        Send_Nextion_Int(SET_SPEED_COMMAND, *dashboard->speed);
-        previousValues.speed = *dashboard->speed;
+    if (*_dashboard->speed != _previousValues.speed) {
+        Send_Nextion_Int(SET_SPEED_COMMAND, *_dashboard->speed);
+        _previousValues.speed = *_dashboard->speed;
     }
 
-    if (*dashboard->batteryValue != previousValues.batteryValue) {
-        Send_Nextion_Int(SET_BATTERY_NUMBER_COMMAND, *dashboard->batteryValue);
-        HAL_StatusTypeDef a = Send_Nextion_Progress_Bar(SET_BATTERY_PROGRESS_BAR_COMMAND, *dashboard->batteryValue, 100, 0, PROGRESS_BAR_NO_REVERSE);
+    if (*_dashboard->batteryValue != _previousValues.batteryValue) {
+        Send_Nextion_Int(SET_BATTERY_NUMBER_COMMAND, *_dashboard->batteryValue);
+        HAL_StatusTypeDef a = Send_Nextion_Progress_Bar(SET_BATTERY_PROGRESS_BAR_COMMAND, *_dashboard->batteryValue, 100, 0, PROGRESS_BAR_NO_REVERSE);
         if (a == HAL_ERROR)
              return HAL_ERROR;
-        previousValues.batteryValue = *dashboard->batteryValue;
+        _previousValues.batteryValue = *_dashboard->batteryValue;
     }
 
 
-    if (*dashboard->powerKW != previousValues.powerKW) {
-        Send_Nextion_Int(SET_KW_NUMBER_COMMAND, *dashboard->powerKW);
-        if (Send_Nextion_Progress_Bar(SET_KW_PROGRESS_BAR_COMMAND, *dashboard->powerKW, 6, 0, PROGRESS_BAR_REVERSE) == HAL_ERROR)
+    if (*_dashboard->powerKW != _previousValues.powerKW) {
+        Send_Nextion_Int(SET_KW_NUMBER_COMMAND, *_dashboard->powerKW);
+        if (Send_Nextion_Progress_Bar(SET_KW_PROGRESS_BAR_COMMAND, *_dashboard->powerKW, 6, 0, PROGRESS_BAR_REVERSE) == HAL_ERROR)
             return HAL_ERROR;
-        previousValues.powerKW = *dashboard->powerKW;
+        _previousValues.powerKW = *_dashboard->powerKW;
     }
 
 
-    if (*dashboard->packVoltage != previousValues.packVoltage) {
-        Send_Nextion_Int(SET_PACK_VOLTAGE, *dashboard->packVoltage);
-        previousValues.packVoltage = *dashboard->packVoltage;
+    if (*_dashboard->packVoltage != _previousValues.packVoltage) {
+        Send_Nextion_Int(SET_PACK_VOLTAGE, *_dashboard->packVoltage);
+        _previousValues.packVoltage = *_dashboard->packVoltage;
     }
 
-    if (*dashboard->maxVoltage != previousValues.maxVoltage) {
-        Send_Nextion_Int(SET_MAX_VOLTAGE, *dashboard->maxVoltage);
-        previousValues.maxVoltage = *dashboard->maxVoltage;
+    if (*_dashboard->maxVoltage != _previousValues.maxVoltage) {
+        Send_Nextion_Int(SET_MAX_VOLTAGE, *_dashboard->maxVoltage);
+        _previousValues.maxVoltage = *_dashboard->maxVoltage;
     }
 
-    if (*dashboard->minVoltage != previousValues.minVoltage) {
-        Send_Nextion_Int(SET_MIN_VOLTAGE, *dashboard->minVoltage);
-        previousValues.minVoltage = *dashboard->minVoltage;
+    if (*_dashboard->minVoltage != _previousValues.minVoltage) {
+        Send_Nextion_Int(SET_MIN_VOLTAGE, *_dashboard->minVoltage);
+        _previousValues.minVoltage = *_dashboard->minVoltage;
     }
 
-    if (*dashboard->batteryTemp != previousValues.batteryTemp) {
-        Send_Nextion_Int(SET_BATTERY_TEMPERATURE, *dashboard->batteryTemp);
-        previousValues.batteryTemp = *dashboard->batteryTemp;
+    if (*_dashboard->batteryTemp != _previousValues.batteryTemp) {
+        Send_Nextion_Int(SET_BATTERY_TEMPERATURE, *_dashboard->batteryTemp);
+        _previousValues.batteryTemp = *_dashboard->batteryTemp;
     }
 
-    if (dashboard->mapData->PixelX != previousValues.mapData.PixelX) {
-        Send_Nextion_Int(SET_MAP_X, dashboard->mapData->PixelX);
-        previousValues.mapData.PixelX = dashboard->mapData->PixelX;
+    if (_dashboard->mapData->PixelX != _previousValues.mapData.PixelX) {
+        Send_Nextion_Int(SET_MAP_X, _dashboard->mapData->PixelX);
+        _previousValues.mapData.PixelX = _dashboard->mapData->PixelX;
     }
 
-    if (dashboard->mapData->PixelY != previousValues.mapData.PixelY) {
-        Send_Nextion_Int(SET_MAP_Y, dashboard->mapData->PixelY);
-        previousValues.mapData.PixelY = dashboard->mapData->PixelY;
+    if (_dashboard->mapData->PixelY != _previousValues.mapData.PixelY) {
+        Send_Nextion_Int(SET_MAP_Y, _dashboard->mapData->PixelY);
+        _previousValues.mapData.PixelY = _dashboard->mapData->PixelY;
     }
 
-    if (dashboard->mapData->IconAngle != previousValues.mapData.IconAngle) {
-        Send_Nextion_Int(SET_MAP_ICON, dashboard->mapData->IconAngle);
-        previousValues.mapData.IconAngle = dashboard->mapData->IconAngle;
+    if (_dashboard->mapData->IconAngle != _previousValues.mapData.IconAngle) {
+        Send_Nextion_Int(SET_MAP_ICON, _dashboard->mapData->IconAngle);
+        _previousValues.mapData.IconAngle = _dashboard->mapData->IconAngle;
     }
 
-    if (dashboard->mapData->Lap != previousValues.mapData.Lap) {
-        Send_Nextion_Int(SET_MAP_LAP, dashboard->mapData->Lap);
-        previousValues.mapData.Lap = dashboard->mapData->Lap;
+    if (_dashboard->mapData->Lap != _previousValues.mapData.Lap) {
+        Send_Nextion_Int(SET_MAP_LAP, _dashboard->mapData->Lap);
+        _previousValues.mapData.Lap = _dashboard->mapData->Lap;
     }
 
     /* Gear */
-    if (*dashboard->gear != previousValues.gear) {
-        switch (*dashboard->gear) {
+    if (*_dashboard->gear != _previousValues.gear) {
+        switch (*_dashboard->gear) {
             case 0: Send_Nextion_Command(SET_GEAR_NEUTRAL); break;
             case 1: Send_Nextion_Command(SET_GEAR_DRIVE); break;
             case 2: Send_Nextion_Command(SET_GEAR_REVERSE); break;
         }
-        previousValues.gear = *dashboard->gear;
+        _previousValues.gear = *_dashboard->gear;
     }
 
     /* Warnings */
-    if (*dashboard->handbrake != previousValues.handbrake) {
-        Send_Nextion_Command(*dashboard->handbrake ? SET_HANDBREAK_ON : SET_HANDBREAK_OFF);
-        previousValues.handbrake = *dashboard->handbrake;
+    if (*_dashboard->handbrake != _previousValues.handbrake) {
+        Send_Nextion_Command(*_dashboard->handbrake ? SET_HANDBREAK_ON : SET_HANDBREAK_OFF);
+        _previousValues.handbrake = *_dashboard->handbrake;
     }
 
-    if (*dashboard->signalLeft != previousValues.signalLeft) {
-        Send_Nextion_Command(*dashboard->signalLeft ? SET_SIGNAL_LEFT_ON : SET_SIGNAL_LEFT_OFF);
-        previousValues.signalLeft = *dashboard->signalLeft;
+    if (*_dashboard->signalLeft != _previousValues.signalLeft) {
+        Send_Nextion_Command(*_dashboard->signalLeft ? SET_SIGNAL_LEFT_ON : SET_SIGNAL_LEFT_OFF);
+        _previousValues.signalLeft = *_dashboard->signalLeft;
     }
 
-    if (*dashboard->signalRight != previousValues.signalRight) {
-        Send_Nextion_Command(*dashboard->signalRight ? SET_SIGNAL_RIGHT_ON : SET_SIGNAL_RIGHT_OFF);
-        previousValues.signalRight = *dashboard->signalRight;
+    if (*_dashboard->signalRight != _previousValues.signalRight) {
+        Send_Nextion_Command(*_dashboard->signalRight ? SET_SIGNAL_RIGHT_ON : SET_SIGNAL_RIGHT_OFF);
+        _previousValues.signalRight = *_dashboard->signalRight;
     }
 
-    if (*dashboard->connWarn != previousValues.connWarn) {
-        Send_Nextion_Command(*dashboard->connWarn ? SET_CONNECTION_WARNING_ON : SET_CONNECTION_WARNING_OFF);
-        previousValues.connWarn = *dashboard->connWarn;
+    if (*_dashboard->connWarn != _previousValues.connWarn) {
+        Send_Nextion_Command(*_dashboard->connWarn ? SET_CONNECTION_WARNING_ON : SET_CONNECTION_WARNING_OFF);
+        _previousValues.connWarn = *_dashboard->connWarn;
     }
 
-    if (*dashboard->battWarn != previousValues.battWarn) {
-        Send_Nextion_Command(*dashboard->battWarn ? SET_BATTERY_WARNING_ON : SET_BATTERY_WARNING_OFF);
-        previousValues.battWarn = *dashboard->battWarn;
+    if (*_dashboard->battWarn != _previousValues.battWarn) {
+        Send_Nextion_Command(*_dashboard->battWarn ? SET_BATTERY_WARNING_ON : SET_BATTERY_WARNING_OFF);
+        _previousValues.battWarn = *_dashboard->battWarn;
     }
 
-    if (*dashboard->lights != previousValues.lights) {
-        Send_Nextion_Command(*dashboard->lights ? SET_LIGHTS_ON : SET_LIGHTS_OFF);
-        previousValues.lights = *dashboard->lights;
+    if (*_dashboard->lights != _previousValues.lights) {
+        Send_Nextion_Command(*_dashboard->lights ? SET_LIGHTS_ON : SET_LIGHTS_OFF);
+        _previousValues.lights = *_dashboard->lights;
     }
 
     return HAL_OK;
