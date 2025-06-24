@@ -15,6 +15,10 @@ static MapOffset _mapCachedData = {
 float actualLon, actualLat;
 
 void Geo_To_Pixel_Init(UART_HandleTypeDef *uart, MapOffset *mapData){
+    Geo_To_Pixel_Bind(uart, mapData);
+}
+
+void Geo_To_Pixel_Bind(UART_HandleTypeDef *uart, MapOffset *mapData){
     _uart = uart;
     _mapData = mapData;
 }
@@ -35,11 +39,15 @@ void Run_GeoPipeline(void){
 
 static float *_lon = NULL;
 static float *_lat = NULL;
+static int *x;
+static int *y;
 
-void Test(float *lon, float *lat, char *test){
+void Test(float *lon, float *lat, char *test, int *testx, int *testy){
 	_lon=lon;
 	_lat=lat;
 	gps_buffer=test;
+	x=testx;
+	y=testy;
 }
 
 void Read_GPS_Location(void) {
@@ -60,7 +68,7 @@ void Read_GPS_Location(void) {
             	token = strtok(NULL, ",");
             	token = strtok(NULL, ",");
 
-            	latitude = NMEA_To_Decimal(token, 'N'); // default 'N'
+            	latitude = NMEA_To_Decimal(token); // default 'N'
 
             	token = strtok(NULL, ",");
 
@@ -68,7 +76,7 @@ void Read_GPS_Location(void) {
             		latitude = -latitude;
 
             	token = strtok(NULL, ",");
-            	longitude = NMEA_To_Decimal(token, 'E'); // default 'E'
+            	longitude = NMEA_To_Decimal(token); // default 'E'
 
             	token = strtok(NULL, ",");
             		if (token[0] == 'W')
@@ -87,7 +95,7 @@ void Read_GPS_Location(void) {
     }
 }
 
-float NMEA_To_Decimal(char *nmea, char hemisphere) {
+float NMEA_To_Decimal(char *nmea) {
     float deg, min;
     float val = atof(nmea);
     deg = (int)(val / 100);
@@ -102,7 +110,8 @@ void Calculate_Geo_To_Pixel(void){
 
 	float mappedYf = Map_Float(actualLat, SE_lat, NW_lat, 0.00f, MAP_Y_SIZE);
 	int mappedY = (int)mappedYf;
-
+	*x=mappedX;
+	*y=mappedY;
 	Get_Map_Draw_Position(mappedX, mappedY);
 }
 

@@ -36,13 +36,15 @@ typedef struct {
 } MapOffset;
 
 
-void Test(float *lon, float *lat, char *test);
+void Test(float *lon, float *lat, char *test, int *testx, int *testy);
 
 
-
-void Run_GeoPipeline(void);
 
 void Geo_To_Pixel_Init(UART_HandleTypeDef *uart, MapOffset *mapData);
+
+void Geo_To_Pixel_Bind(UART_HandleTypeDef *uart, MapOffset *mapData);
+
+void Run_GeoPipeline(void);
 
 void Read_GPS_Location(void);
 
