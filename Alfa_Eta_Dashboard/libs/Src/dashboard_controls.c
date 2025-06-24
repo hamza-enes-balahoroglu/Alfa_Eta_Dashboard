@@ -86,15 +86,14 @@ static NEX_CachedData _previousValues = {0};
 static const uint8_t COMMAND_END[3] = {0xFF, 0xFF, 0xFF};
 
 /**
- * @brief Initializes the connection with the Nextion display (includes handshake)
- *
- * @note This function must be called *after* initializing the UART
- *       (e.g., after MX_USARTx_UART_Init()). Otherwise, the `_uart` pointer
- *       will remain NULL and communication errors may occur.
- *
- * @param uart: Pointer to UART interface to use
- * @retval HAL_OK or HAL_ERROR depending on handshake result
- */
+  * @brief  Initializes the connection with the Nextion display (includes handshake).
+  * @param  uart: Pointer to UART interface to use.
+  * @param  data: Pointer to a NEX_Data structure containing runtime variable addresses.
+  * @retval HAL_OK or HAL_ERROR depending on handshake result.
+  * @note   This function must be called *after* initializing the UART
+  *         (e.g., after MX_USARTx_UART_Init()). Otherwise, the `_uart` pointer
+  *         will remain NULL and communication errors may occur.
+  */
 HAL_StatusTypeDef Dashboard_Init(UART_HandleTypeDef *uart, NEX_Data *data){
 
     Dashboard_Bind(uart, data);
@@ -103,8 +102,9 @@ HAL_StatusTypeDef Dashboard_Init(UART_HandleTypeDef *uart, NEX_Data *data){
 
 /**
   * @brief  Binds the dashboard data structure containing pointers to all runtime values.
-  *         This function must be called once before using Dashboard_Refresh().
-  * @param  data: Pointer to a user-defined DashboardData structure with field addresses set.
+  *         Sets internal pointers for UART and data access.
+  * @param  uart: Pointer to the UART handler for communication.
+  * @param  data: Pointer to a user-defined NEX_Data structure with field addresses set.
   * @retval None
   */
 void Dashboard_Bind(UART_HandleTypeDef *uart, NEX_Data *data){
@@ -113,10 +113,15 @@ void Dashboard_Bind(UART_HandleTypeDef *uart, NEX_Data *data){
 }
 
 /**
-  * @brief  Refreshes the Nextion display with updated system data only.
-  *         Only changed values are sent to reduce UART traffic.
-  * @note   This function checks if the screen is connected first using handshake.
-  * @retval HAL_OK if update sent successfully, HAL_ERROR otherwise.
+  * @brief  Refreshes the Nextion display with updated system data.
+  *
+  *         This function checks each runtime variable stored in the dashboard structure.
+  *         If the new value differs from the previously sent one, it transmits the update
+  *         via UART using the appropriate Nextion command. This selective update reduces
+  *         unnecessary UART traffic.
+  *
+  * @note   Must be called periodically inside the main loop or a task.
+  * @retval HAL_OK on full success, HAL_ERROR if any UART failure occurs.
   */
 HAL_StatusTypeDef Dashboard_Refresh(void) {
 
@@ -230,31 +235,44 @@ HAL_StatusTypeDef Dashboard_Refresh(void) {
 }
 
 /**
- * @brief Sends a plain string command to the Nextion display
- *
- * @param cmd: Command string to send
- */
+  * @brief  Sends a pre-defined command string to the Nextion display.
+  *
+  *         Uses the given command ID to look up the corresponding string in the
+  *         NEX_Command array, and sends it using UART.
+  *
+  * @param  cmdID: Index of the command in the NEX_Command string array.
+  * @retval None
+  */
 void Send_Nextion_Command(NEX_CommandID cmdID)
 {
     Send_String_To_Nextion((char *)NEX_Command[cmdID]);
 }
 
 /**
- * @brief Sends a plain string command to the Nextion display
- *
- * @param cmd: Command string to send
- */
+  * @brief  Sends a null-terminated command string to the Nextion display.
+  *
+  *         After sending the command, this function automatically appends
+  *         the 0xFF 0xFF 0xFF terminator required by the Nextion protocol.
+  *
+  * @param  str: Command string to transmit (e.g., "page main").
+  * @retval None
+  */
 void Send_String_To_Nextion(char *str)
 {
     HAL_UART_Transmit(_uart, (uint8_t*)str, strlen(str), HAL_MAX_DELAY);
     Command_Terminator(); // Send 3-byte terminator at the end of the command
 }
+
 /**
- * @brief Formats a command with an integer value and sends it
- *
- * @param cmd: Command string containing %d format
- * @param val: Integer value to insert
- */
+  * @brief  Sends a formatted command with integer value to the Nextion display.
+  *
+  *         Replaces the %d placeholder in the command string with the actual
+  *         integer value and sends it via UART. Useful for dynamic numbers.
+  *
+  * @param  cmdID: Index in NEX_Int_Command array.
+  * @param  val: Integer to inject into command string.
+  * @retval None
+  */
 void Send_Nextion_Int(NEX_Int_Command_ID cmdID, int val){
     char command[20]; // 20-character command buffer
     const char *cmd = NEX_Int_Command[cmdID];
@@ -264,19 +282,24 @@ void Send_Nextion_Int(NEX_Int_Command_ID cmdID, int val){
 
 
 /**
- * @brief Maps a given value within a specified range and sends it
- *        to a Nextion display progress bar. Supports normal or reversed direction.
- *
- * @param cmd: Command string containing %d placeholder (e.g., "jBt.val=%d")
- * @param val: The actual data value to be visualized
- * @param maxVal: The expected maximum value of the input range
- * @param minVal: The expected minimum value of the input range
- * @param reverseProgressBar: If 1, the progress bar will be reversed (100 to 0);
- *                             if 0, it will increase normally (0 to 100)
- *s
- * @retval HAL_OK: The value was within the range, successfully mapped and sent
- *         HAL_ERROR: The value was outside the defined range
- */
+  * @brief  Maps a value from the given input range to a 0-100 scale and sends it
+  *         as a progress bar update command to the Nextion display.
+  *
+  *         If reverseProgressBar is set, the mapped value is inverted (100 - mapped value).
+  *
+  * @param  cmdID:             Identifier for the progress bar command string containing a %d placeholder.
+  * @param  val:               The current data value to be visualized.
+  * @param  maxVal:            Maximum boundary of the input range.
+  * @param  minVal:            Minimum boundary of the input range.
+  * @param  reverseProgressBar: Direction control for progress bar:
+  *                             - PROGRESS_BAR_REVERSE: Invert progress bar fill.
+  *                             - PROGRESS_BAR_NO_REVERSE: Normal progress bar fill.
+  *
+  * @retval HAL_OK if val is inside the range and the command is sent successfully.
+  * @retval HAL_ERROR if val is outside the specified range.
+  *
+  * @note   Uses Map_Int() to scale the input value to 0-100.
+  */
 HAL_StatusTypeDef Send_Nextion_Progress_Bar(NEX_Int_Command_ID cmdID, int val, int maxVal, int minVal, NEX_ProgressBar_Rotation reverseProgressBar){
     if (minVal <= val && val <=maxVal){
     	int mapVal;
@@ -293,15 +316,24 @@ HAL_StatusTypeDef Send_Nextion_Progress_Bar(NEX_Int_Command_ID cmdID, int val, i
 }
 
 /**
- * @brief Maps an input value from one range to another
- *
- * @param input: Value to map
- * @param maxValue: Input maximum
- * @param minValue: Input minimum
- * @param refMaxValue: Target maximum
- * @param refMinValue: Target minimum
- * @retval Mapped output value
- */
+  * @brief  Maps an integer value from one range to another using linear interpolation.
+  *
+  *         Formula used:
+  *         y = (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
+  *
+  *         Useful when scaling sensor data, UI inputs or any raw value from hardware.
+  *
+  * @param  input:       Integer value to be scaled.
+  * @param  in_min:      Lower bound of input range.
+  * @param  in_max:      Upper bound of input range.
+  * @param  out_min:     Lower bound of target range.
+  * @param  out_max:     Upper bound of target range.
+  *
+  * @retval int:         Scaled result within the specified output range.
+  *
+  * @note   Integer division is used; fractional precision is discarded.
+  *         Make sure (in_max - in_min) ≠ 0 to avoid division by zero.
+  */
 int Map_Int(int input, int in_min, int in_max, int out_min, int out_max)
 {
     //uint32_t input_range = in_max - in_min + 1;
@@ -317,19 +349,37 @@ int Map_Int(int input, int in_min, int in_max, int out_min, int out_max)
 }
 
 /**
- * @brief Sends the standard 3-byte command terminator to Nextion
- */
+  * @brief  Sends the standard command termination sequence to Nextion (0xFF 0xFF 0xFF).
+  *
+  *         According to the Nextion protocol, every command string sent to the
+  *         display must be terminated with three 0xFF bytes. This function handles
+  *         the transmission of that termination sequence via the assigned UART.
+  *
+  * @note   `_uart` must be initialized before calling this function.
+  *         Otherwise, the transmission will fail or crash the system.
+  *
+  * @retval None
+  */
 void Command_Terminator(void){
     HAL_UART_Transmit(_uart, (uint8_t*)COMMAND_END, sizeof(COMMAND_END), 100);
 }
 
 /**
- * @brief Performs handshake to validate communication with Nextion screen.
- *
- * @param timeout: Timeout value for UART receive (in ms)
- * @retval HAL_OK: "OK" message received successfully
- *         HAL_ERROR: Valid response not received
- */
+  * @brief  Performs a handshake with the Nextion screen over UART.
+  *
+  *         The function attempts communication with the Nextion display by:
+  *         1. Listening for a 2-byte "OK" response from the display.
+  *         2. Sending a "con=1" (connection OK) command in response.
+  *         3. Repeating the process up to 5 times if necessary.
+  *
+  * @param  timeout: Timeout duration (in milliseconds) for each receive attempt.
+  *
+  * @retval HAL_OK    If an "OK" is received within the allowed number of attempts.
+  * @retval HAL_ERROR If no valid response is received.
+  *
+  * @note   Make sure `_uart` is correctly initialized before calling this function.
+  *         Recommended to call after `MX_USARTx_UART_Init()` and before other Nextion commands.
+  */
 HAL_StatusTypeDef Nextion_Handshake(uint32_t timeout){
     uint8_t rx_buffer[10]; // Buffer for receiving data
 

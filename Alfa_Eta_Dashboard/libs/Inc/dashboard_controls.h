@@ -143,81 +143,108 @@ typedef enum
 /*--------------------- Function Prototypes ---------------------*/
 
 /**
- * @brief Initializes the dashboard UART communication.
- * @param uart: Pointer to the UART handler (e.g., &huart2).
- * @retval HAL status.
- * @note Must be called after MX_USARTx_UART_Init().
- */
+  * @brief  Initializes the dashboard UART communication.
+  * @param  uart: Pointer to the UART handler (e.g., &huart2).
+  * @param  data: Pointer to a NEX_Data structure that holds all runtime value pointers.
+  * @retval HAL status.
+  * @note   Must be called after MX_USARTx_UART_Init().
+  */
 HAL_StatusTypeDef Dashboard_Init(UART_HandleTypeDef *uart, NEX_Data *data);
 
 /**
- * @brief Initializes the dashboard pointer map (must be called once after setting up values).
- * @param data: Pointer to a structure containing all relevant value addresses.
- */
+  * @brief  Initializes the dashboard pointer map.
+  *         This function binds the internal pointers to user-defined runtime values.
+  * @param  uart: Pointer to the UART handler used for Nextion communication.
+  * @param  data: Pointer to a NEX_Data structure containing all relevant value addresses.
+  * @retval None
+  * @note   Must be called once after setting up values.
+  */
 void Dashboard_Bind(UART_HandleTypeDef *uart, NEX_Data *data);
 
 /**
- * @brief Refreshes the dashboard screen with the latest data.
- * @retval HAL status.
- */
+  * @brief  Refreshes the dashboard screen with the latest runtime data.
+  *         Sends only changed values to reduce UART traffic.
+  * @retval HAL_OK on success, HAL_ERROR on transmission failure.
+  */
 HAL_StatusTypeDef Dashboard_Refresh(void);
 
 /**
- * @brief Sends a NEX_Command to the Nextion display.
- * @param cmd: NEX_CommandID value to command
- */
+  * @brief  Sends a pre-defined command to the Nextion display using command ID.
+  * @param  cmdID: Enum key for the Nextion command array (e.g., SET_GEAR_DRIVE).
+  */
 void Send_Nextion_Command(NEX_CommandID cmd);
 
 /**
- * @brief Sends a string to the Nextion display.
- * @param cmd: Null-terminated command string.
- */
+  * @brief  Sends a null-terminated command string to the Nextion display.
+  *         Automatically appends the 3-byte command terminator.
+  * @param  str: Command string (e.g., "page main").
+  */
 void Send_String_To_Nextion(char *str);
 
 /**
- * @brief Sends a formatted command with integer value to the display.
- * @param cmd: Command string with %d placeholder.
- * @param val: Integer value to insert.
- */
+  * @brief  Sends a formatted string with an integer value to the Nextion display.
+  *         Useful for numeric values like speed, voltage, etc.
+  * @param  cmdID: Enum key for integer-based commands with %d format.
+  * @param  val: Integer value to inject into command string.
+  */
 void Send_Nextion_Int(NEX_Int_Command_ID cmdID, int val);
 
 /**
- * @brief Sends a scaled progress bar value based on a given range.
- *        Supports normal or reversed progress direction.
- *
- * @param cmd: Command string with %d placeholder (e.g., "jBt.val=%d").
- * @param val: Current input value to be mapped.
- * @param maxVal: Maximum expected value of the input.
- * @param minVal: Minimum expected value of the input.
- * @param reverseProgressBar: Set to PROGRESS_BAR_REVERSE or 1 for reversed progress (100 to 0),
- *                             or PROGRESS_BAR_NO_REVERSE or 0 for normal progress (0 to 100).
- *
- * @retval HAL_OK if the value is within the range and sent successfully.
- *         HAL_ERROR if the value is out of the defined range.
- */
+  * @brief  Sends a scaled progress bar value to the Nextion display.
+  *
+  *         Maps the input value from its actual range to 0-100 scale and sends it to the progress bar.
+  *         Supports normal and reversed progress bar directions.
+  *
+  * @param  cmdID:             Enum for the integer command string with a %d placeholder.
+  * @param  val:               Current input value.
+  * @param  maxVal:            Maximum expected input value.
+  * @param  minVal:            Minimum expected input value.
+  * @param  reverseProgressBar: Specifies progress direction:
+  *                             - PROGRESS_BAR_REVERSE (1): Progress bar decreases from 100 to 0.
+  *                             - PROGRESS_BAR_NO_REVERSE (0): Progress bar increases from 0 to 100.
+  *
+  * @retval HAL_OK if the value was within the expected range and sent successfully.
+  * @retval HAL_ERROR if the value was out of range.
+  */
 HAL_StatusTypeDef Send_Nextion_Progress_Bar(NEX_Int_Command_ID cmd, int val, int maxVal, int minVal, NEX_ProgressBar_Rotation reverseProgressBar);
 
 /**
- * @brief Performs a UART-based handshake with the Nextion screen.
- * @param timeout: Maximum wait time for response in milliseconds.
- * @retval HAL_OK on successful handshake, HAL_ERROR otherwise.
- */
+  * @brief  Performs a UART-based handshake with the Nextion display.
+  *
+  *         This function attempts to confirm communication with the Nextion screen
+  *         by waiting for an "OK" response and replying with a standard connection command.
+  *
+  * @param  timeout: Maximum time to wait (in milliseconds) for a response per attempt.
+  *
+  * @retval HAL_OK    If handshake is successful.
+  * @retval HAL_ERROR If no valid response is received within given retries.
+  */
 HAL_StatusTypeDef Nextion_Handshake(uint32_t timeout);
 
 /**
- * @brief Sends command termination bytes (0xFF 0xFF 0xFF).
- */
+  * @brief  Sends the standard 3-byte command terminator to the Nextion display.
+  *
+  * @note   Nextion protocol requires every command to end with 0xFF 0xFF 0xFF.
+  *         This function transmits those bytes over the selected UART.
+  *
+  * @retval None
+  */
 void Command_Terminator(void);
 
 /**
- * @brief Maps a value from one range to another.
- * @param input: Input value.
- * @param maxValue: Source range maximum.
- * @param minValue: Source range minimum.
- * @param refMaxValue: Target range maximum.
- * @param refMinValue: Target range minimum.
- * @return Mapped integer result.
- */
+  * @brief  Maps an integer input value from one range to another.
+  *
+  * @param  input:       Value to be mapped.
+  * @param  in_min:      Minimum of the input range.
+  * @param  in_max:      Maximum of the input range.
+  * @param  out_min:     Minimum of the output range.
+  * @param  out_max:     Maximum of the output range.
+  *
+  * @retval int:         Mapped output value scaled to target range.
+  *
+  * @note   This function is specific to integer values. For floating-point precision,
+  *         use a dedicated float version.
+  */
 int Map_Int(int input, int in_min, int in_max, int out_min, int out_max);
 
 #endif // DASHBOARD_CONTROLS
