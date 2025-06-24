@@ -49,6 +49,8 @@ int count = 0;
 
 float lon;
 float lat;
+int mapx;
+int mapy;
 char gps_test[GPS_BUFFER_SIZE];
 char gps_storage[100];
 
@@ -139,12 +141,11 @@ int main(void)
   MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
 
-  // IMPOTANT : Call after UART initialization (e.g., MX_USART2_UART_Init())
-  Connection_Check = Dashboard_Init(&huart2);
+  // IMPOTANT : Call after UART initialization (e.g., MX_USARTX_UART_Init())
+  Connection_Check = Dashboard_Init(&huart2, &dashboardValues);
   Geo_To_Pixel_Init(&huart3, &MapData);
-  Test(&lon, &lat, gps_storage);
+  Test(&lon, &lat, gps_storage, &mapx, &mapy);
 
-  Dashboard_Bind(&dashboardValues);
 
 
   /* USER CODE END 2 */
