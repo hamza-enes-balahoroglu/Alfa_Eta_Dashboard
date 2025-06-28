@@ -39,10 +39,10 @@ void Run_GeoPipeline(void){
 
 static float *_lon = NULL;
 static float *_lat = NULL;
-static int *x;
-static int *y;
+static float *x;
+static float *y;
 
-void Test(float *lon, float *lat, char *test, int *testx, int *testy){
+void Test(float *lon, float *lat, char *test, float *testx, float *testy){
 	_lon=lon;
 	_lat=lat;
 	gps_buffer=test;
@@ -51,86 +51,132 @@ void Test(float *lon, float *lat, char *test, int *testx, int *testy){
 }
 
 void Read_GPS_Location(void) {
-	float latitude,longitude;
+    float latitude = 0.0f, longitude = 0.0f;
+
+    // buffer'ı temizle
     memset(gps_buffer, 0, GPS_BUFFER_SIZE);
     HAL_UART_Receive(_uart, (uint8_t *)gps_buffer, GPS_BUFFER_SIZE, 1000);
 
-    if (strstr(gps_buffer, "$GNRMC")) {
-        char *token;
+    // $GNRMC geçen satırı bul
+    char *start = gps_buffer;
+    while ((start = strstr(start, "$GNRMC")) != NULL) {
 
-        token = strtok(gps_buffer, ",");
+        char temp_buf[GPS_BUFFER_SIZE];
+        strncpy(temp_buf, start, GPS_BUFFER_SIZE - 1);
+        temp_buf[GPS_BUFFER_SIZE - 1] = '\0';
+
+        char *token = strtok(temp_buf, ",");
+        int fieldIndex = 0;
+
+        char *latStr = NULL;
+        char *latDir = NULL;
+        char *lonStr = NULL;
+        char *lonDir = NULL;
+        //	char *dirStr = NULL; // yön bilgisi burada geçici tutulacak
+        char status = 0;
+
         while (token != NULL) {
+            switch (fieldIndex) {
+                case 2:
+                    status = token[0]; // 'A' ya da 'V'
+                    break;
+                case 3:
+                    latStr = token;
+                    break;
+                case 4:
+                    latDir = token;
+                    break;
+                case 5:
+                    lonStr = token;
+                    break;
+                case 6:
+                    lonDir = token;
+                    break;
+               /*
+                case 8:
+                	dirStr = token; // yön bilgisi (course over ground)
+                	break;
+                */
 
-
-            if (strstr(token, "$GNRMC")){
-
-            	token = strtok(NULL, ",");
-            	token = strtok(NULL, ",");
-            	token = strtok(NULL, ",");
-
-            	latitude = NMEA_To_Decimal(token); // default 'N'
-
-            	token = strtok(NULL, ",");
-
-            	if (token[0] == 'S')
-            		latitude = -latitude;
-
-            	token = strtok(NULL, ",");
-            	longitude = NMEA_To_Decimal(token); // default 'E'
-
-            	token = strtok(NULL, ",");
-            		if (token[0] == 'W')
-            			longitude = -longitude;
-            	break;
             }
 
+            fieldIndex++;
             token = strtok(NULL, ",");
         }
-        actualLat = latitude;
-        actualLon = longitude;
 
-        if (_lat != NULL) *_lat = latitude;
-        if (_lon != NULL) *_lon = longitude;
+        if (status == 'A' && latStr && lonStr && latDir && lonDir) {
+            latitude = NMEA_To_Decimal(latStr);
+            if (latDir[0] == 'S') latitude = -latitude;
 
+            longitude = NMEA_To_Decimal(lonStr);
+            if (lonDir[0] == 'W') longitude = -longitude;
+
+            actualLat = latitude;
+            actualLon = longitude;
+/*
+            if (dirStr) {
+
+                _mapCachedData.IconAngle = _mapData->IconAngle;
+                _mapData->IconAngle = (int)atof(dirStr);
+            }
+
+            */
+
+            if (_lat) *_lat = latitude;
+            if (_lon) *_lon = longitude;
+
+            break; // başarılı satırı işledik, çık
+        }
+
+        // bir sonrakine bak, olur da başka GNRMC varsa
+        start += 6; // "$GNRMC" uzunluğu kadar atla
     }
 }
 
 float NMEA_To_Decimal(char *nmea) {
-    float deg, min;
-    float val = atof(nmea);
-    deg = (int)(val / 100);
-    min = val - (deg * 100);
-    float decimal = deg + (min / 60.0);
-    return decimal;
+    if (nmea == NULL) return 0.0f;
+
+    int degrees = 0;
+    float minutes = 0.0f;
+    char deg_buff[4] = {0}; // max 3 digit + null
+
+    int len = strchr(nmea, '.') - nmea; // noktaya kadar olan uzunluk
+    int deg_digits = (len > 4) ? 3 : 2; // 3se boylam, 2se enlem
+
+    strncpy(deg_buff, nmea, deg_digits);
+    degrees = atoi(deg_buff);
+    minutes = atof(nmea + deg_digits);
+
+    return degrees + (minutes / 60.0f);
 }
 
 void Calculate_Geo_To_Pixel(void){
 	float mappedXf = Map_Float(actualLon, NW_lon, SE_lon, 0.00f , MAP_X_SIZE);
 	int mappedX = (int)mappedXf;
 
-	float mappedYf = Map_Float(actualLat, SE_lat, NW_lat, 0.00f, MAP_Y_SIZE);
+	float mappedYf = Map_Float(actualLat, NW_lat, SE_lat, 0.00f, MAP_Y_SIZE);
 	int mappedY = (int)mappedYf;
-	*x=mappedX;
-	*y=mappedY;
+	*x=mappedXf;
+	*y=mappedYf;
 	Get_Map_Draw_Position(mappedX, mappedY);
 }
 
 void Get_Map_Draw_Position(int gpsPixelX, int gpsPixelY) {
 	int pixelX, pixelY;
 
-	pixelX = ICON_X + (ICON_WIDTH/2) - gpsPixelX;
-/*
+	pixelX = ICON_X + (int)(ICON_WIDTH/2) - gpsPixelX;
+
 	if(pixelX < MAP_X_MIN_VAL)
 		pixelX = MAP_X_MIN_VAL;
 	else if(pixelX > MAP_X_MAX_VAL)
-		pixelX = MAP_X_MAX_VAL; */
+		pixelX = MAP_X_MAX_VAL;
 
-	pixelY = ICON_Y + (ICON_HEIGHT/2) - gpsPixelY;
+	pixelY = ICON_Y + (int)(ICON_HEIGHT/2) - gpsPixelY;
 
-/*	if(pixelY < MAP_Y_MIN_VAL)
+	if(pixelY < MAP_Y_MIN_VAL)
 		pixelY = MAP_Y_MIN_VAL;
 	else if(pixelY > MAP_Y_MAX_VAL)
-		pixelY = MAP_Y_MAX_VAL; */
+		pixelY = MAP_Y_MAX_VAL;
 	_mapData->PixelX = pixelX;
 	_mapData->PixelY = pixelY;
 }
@@ -157,8 +203,8 @@ float Map_Float(float input, float in_min, float in_max, float out_min, float ou
 */
 float Map_Float(float input, float in_min, float in_max, float out_min, float out_max)
 {
-    float input_range = in_max - in_min + 1;
-    float ref_range = out_max - out_min + 1;
+    float input_range = in_max - in_min;
+    float ref_range = out_max - out_min;
 
     return ((ref_range * (input - in_min)) / input_range) + out_min;
 }
