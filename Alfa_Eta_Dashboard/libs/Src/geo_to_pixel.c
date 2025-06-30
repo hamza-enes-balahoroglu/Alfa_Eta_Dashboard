@@ -12,6 +12,8 @@ static MapOffset _mapCachedData = {
 		.Lap 		=	0,
 };
 
+static GPS_Data _gpsData;
+
 float actualLon, actualLat;
 
 void Geo_To_Pixel_Init(UART_HandleTypeDef *uart, MapOffset *mapData){
@@ -28,11 +30,7 @@ void Run_GeoPipeline(void){
 
 	Calculate_Geo_To_Pixel();
 
-	if (_mapCachedData.PixelX != _mapData->PixelX || _mapCachedData.PixelY != _mapData->PixelY){
-		Calculate_Icon_Angle();
-		_mapCachedData.PixelX = _mapData->PixelX;
-		_mapCachedData.PixelY = _mapData->PixelY;
-	}
+	Calculate_Icon_Angle();
 	// _mapData->Lap = _mapData->Lap+1;
 
 }
@@ -68,12 +66,12 @@ void Read_GPS_Location(void) {
         char *token = strtok(temp_buf, ",");
         int fieldIndex = 0;
 
-        char *latStr = NULL;
-        char *latDir = NULL;
-        char *lonStr = NULL;
-        char *lonDir = NULL;
-        //	char *dirStr = NULL; // yön bilgisi burada geçici tutulacak
-        char status = 0;
+        char status 	= 0;
+        char *latStr 	= NULL;
+        char *latDir 	= NULL;
+        char *lonStr 	= NULL;
+        char *lonDir 	= NULL;
+        char *speedStr	= NULL;
 
         while (token != NULL) {
             switch (fieldIndex) {
@@ -92,11 +90,9 @@ void Read_GPS_Location(void) {
                 case 6:
                     lonDir = token;
                     break;
-               /*
-                case 8:
-                	dirStr = token; // yön bilgisi (course over ground)
-                	break;
-                */
+                case 7:
+                    speedStr = token;
+                    break;
 
             }
 
@@ -111,16 +107,15 @@ void Read_GPS_Location(void) {
             longitude = NMEA_To_Decimal(lonStr);
             if (lonDir[0] == 'W') longitude = -longitude;
 
-            actualLat = latitude;
-            actualLon = longitude;
-/*
-            if (dirStr) {
-
-                _mapCachedData.IconAngle = _mapData->IconAngle;
-                _mapData->IconAngle = (int)atof(dirStr);
+            if (speedStr) {
+            	// ayrı bir fonksiyonda hesaplanabilir.
+                float speedKnots = atof(speedStr);
+                float speedKmph = speedKnots * 1.852f;
+                if (_gpsData.speed) _gpsData.speed = speedKmph;
             }
 
-            */
+            actualLat = latitude;
+            actualLon = longitude;
 
             if (_lat) *_lat = latitude;
             if (_lon) *_lon = longitude;
@@ -148,6 +143,20 @@ float NMEA_To_Decimal(char *nmea) {
     minutes = atof(nmea + deg_digits);
 
     return degrees + (minutes / 60.0f);
+}
+
+float GPS_CalcDistance(float lat1, float lon1, float lat2, float lon2)
+{
+    const float R = 6371000.0f; // Dünya yarıçapı metre
+    float dLat = (lat2 - lat1) * (M_PI / 180.0f);
+    float dLon = (lon2 - lon1) * (M_PI / 180.0f);
+
+    float a = sinf(dLat/2) * sinf(dLat/2) +
+              cosf(lat1 * M_PI / 180.0f) * cosf(lat2 * M_PI / 180.0f) *
+              sinf(dLon/2) * sinf(dLon/2);
+
+    float c = 2 * atan2f(sqrtf(a), sqrtf(1-a));
+    return R * c; // metre cinsinden mesafe
 }
 
 void Calculate_Geo_To_Pixel(void){
@@ -183,24 +192,25 @@ void Get_Map_Draw_Position(int gpsPixelX, int gpsPixelY) {
 
 void Calculate_Icon_Angle(void) {
 
-    double angle_rad = atan2(_mapCachedData.PixelY - _mapData->PixelY, _mapCachedData.PixelX - _mapData->PixelX);  // -π ile +π arası
-    double angle_deg = angle_rad * (180.0 / M_PI);             // -180 ile +180 arası
+	if (_mapCachedData.PixelX != _mapData->PixelX || _mapCachedData.PixelY != _mapData->PixelY){
 
-    angle_deg += 180;                                          // 0 derece batı olacak şekilde kaydırıyoruz
+	    double angle_rad = atan2(_mapCachedData.PixelY - _mapData->PixelY, _mapCachedData.PixelX - _mapData->PixelX);  // -π ile +π arası
+	    double angle_deg = angle_rad * (180.0 / M_PI);             // -180 ile +180 arası
 
-    // 0-360 arası normalize et
-    if (angle_deg < 0) angle_deg += 360;
-    if (angle_deg >= 360) angle_deg -= 360;
+	    angle_deg += 180;                                          // 0 derece batı olacak şekilde kaydırıyoruz
 
-    _mapData->IconAngle = angle_deg;  // artık 0 (batı) ile 360 arası
+	    // 0-360 arası normalize et
+	    if (angle_deg < 0) angle_deg += 360;
+	    if (angle_deg >= 360) angle_deg -= 360;
+
+	    _mapData->IconAngle = angle_deg;  // artık 0 (batı) ile 360 arası
+
+		_mapCachedData.PixelX = _mapData->PixelX;
+		_mapCachedData.PixelY = _mapData->PixelY;
+	}
 }
 
-/*
-float Map_Float(float input, float in_min, float in_max, float out_min, float out_max) {
-    float ratio = (input - in_min) / (in_max - in_min);
-    return out_min + ratio * (out_max - out_min);
-}
-*/
+
 float Map_Float(float input, float in_min, float in_max, float out_min, float out_max)
 {
     float input_range = in_max - in_min;
