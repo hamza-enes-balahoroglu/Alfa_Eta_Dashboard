@@ -49,8 +49,8 @@ int count = 0;
 
 float lon;
 float lat;
-int mapx;
-int mapy;
+float mapx;
+float mapy;
 char gps_test[GPS_BUFFER_SIZE];
 char gps_storage[100];
 
@@ -167,8 +167,9 @@ int main(void)
 	  connWarn = 1;
 	  battWarn = 1;
 	  lights = 1;
-	  speed = 10;
-
+	  speed = count;
+	  count = count+1;
+	  if(count>50) count = 0;
 
 	  Run_GeoPipeline();
 
@@ -177,7 +178,7 @@ int main(void)
 
 	  Dashboard_Refresh();
 
-	  HAL_Delay(300);
+	  HAL_Delay(500);
 
     /* USER CODE END WHILE */
 
