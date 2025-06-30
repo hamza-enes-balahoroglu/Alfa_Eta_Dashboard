@@ -1,1 +1,19 @@
 /Debug/
+# Derleme çıktıları
+/Debug/
+/Release/
+*.o
+*.elf
+*.hex
+*.bin
+
+# IDE geçici dosyaları
+*.log
+*.launch
+*.settings/
+.metadata/
+*.launch
+
+# Yedekleme dosyaları
+*~
+
