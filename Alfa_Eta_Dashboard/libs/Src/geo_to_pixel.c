@@ -12,9 +12,9 @@ static MapOffset _mapCachedData = {
 		.Lap 		=	0,
 };
 
-static GPS_Data _gpsData;
-
-float actualLon, actualLat;
+static GPS_Data _gpsData ={
+		.speed		= 0.00f
+};
 
 void Geo_To_Pixel_Init(UART_HandleTypeDef *uart, MapOffset *mapData){
     Geo_To_Pixel_Bind(uart, mapData);
@@ -114,8 +114,10 @@ void Read_GPS_Location(void) {
                 if (_gpsData.speed) _gpsData.speed = speedKmph;
             }
 
-            actualLat = latitude;
-            actualLon = longitude;
+            _gpsData.raw_lat = latitude;
+            _gpsData.raw_lon = longitude;
+
+            GPS_Filter(&_gpsData);
 
             if (_lat) *_lat = latitude;
             if (_lon) *_lon = longitude;
@@ -145,6 +147,23 @@ float NMEA_To_Decimal(char *nmea) {
     return degrees + (minutes / 60.0f);
 }
 
+void GPS_Filter(GPS_Data *gps)
+{
+    float dist = GPS_CalcDistance(gps->raw_lat, gps->raw_lon, gps->last_lat, gps->last_lon);
+
+    if (gps->speed < 1.0f || dist < 3.0f) {
+        // sabitsin, eski değerleri kullan
+        gps->filtered_lat = gps->last_lat;
+        gps->filtered_lon = gps->last_lon;
+    } else {
+        // hareket var, güncelle
+        gps->filtered_lat = gps->raw_lat;
+        gps->filtered_lon = gps->raw_lon;
+        gps->last_lat = gps->raw_lat;
+        gps->last_lon = gps->raw_lon;
+    }
+}
+
 float GPS_CalcDistance(float lat1, float lon1, float lat2, float lon2)
 {
     const float R = 6371000.0f; // Dünya yarıçapı metre
@@ -160,10 +179,10 @@ float GPS_CalcDistance(float lat1, float lon1, float lat2, float lon2)
 }
 
 void Calculate_Geo_To_Pixel(void){
-	float mappedXf = Map_Float(actualLon, NW_lon, SE_lon, 0.00f , MAP_X_SIZE);
+	float mappedXf = Map_Float(_gpsData.filtered_lon, NW_lon, SE_lon, 0.00f , MAP_X_SIZE);
 	int mappedX = (int)mappedXf;
 
-	float mappedYf = Map_Float(actualLat, NW_lat, SE_lat, 0.00f, MAP_Y_SIZE);
+	float mappedYf = Map_Float(_gpsData.filtered_lat, NW_lat, SE_lat, 0.00f, MAP_Y_SIZE);
 	int mappedY = (int)mappedYf;
 	*x=mappedXf;
 	*y=mappedYf;

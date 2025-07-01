@@ -6,9 +6,6 @@
 #include <stdlib.h>
 #include <math.h>
 
-#define NEX_PAGE_X_SIZE 800
-#define NEX_PAGE_Y_SIZE 480
-
 #define MAP_X_SIZE 800.00f
 #define MAP_Y_SIZE 750.00f
 
@@ -39,6 +36,16 @@ typedef struct {
 } MapOffset;
 
 
+typedef struct {
+    float raw_lat;
+    float raw_lon;
+    float last_lat;
+    float last_lon;
+    float filtered_lat;
+    float filtered_lon;
+    float speed;      // km/h
+} GPS_Data;
+
 void Test(float *lon, float *lat, char *test, float *testx, float *testy);
 
 
@@ -52,6 +59,10 @@ void Run_GeoPipeline(void);
 void Read_GPS_Location(void);
 
 float NMEA_To_Decimal(char *nmea);
+
+void GPS_Filter(GPS_Data *gps);
+
+float GPS_CalcDistance(float lat1, float lon1, float lat2, float lon2);
 
 void Calculate_Geo_To_Pixel(void);
 
