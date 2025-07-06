@@ -7,12 +7,21 @@
  * @version        : v1.0
  * @date           : 25.06.2025
  *
- * @note
- * This source file implements functions for reading GPS data via UART,
- * filtering GPS coordinates, mapping them to pixel values on a map,
- * and calculating icon orientation angles.
+ * @details
+ * This file contains the implementation of functions for handling GPS data and
+ * converting geographical coordinates to pixel positions on a predefined map layout.
+ *
+ * It includes:
+ *  - Parsing NMEA-formatted GPS strings
+ *  - Filtering GPS position data
+ *  - Mapping latitude and longitude to x/y pixel coordinates
+ *  - Computing directional angle of movement
  *
  * Designed for use with STM32CubeIDE and STM32 HAL libraries.
+ *
+ * @note
+ * GPS-related functions should be called after UART and GPS module initialization.
+ * Ensure the coordinate mapping limits (MAP_X/Y_MIN/MAX) match the map's resolution.
  *
  ******************************************************************************
  */

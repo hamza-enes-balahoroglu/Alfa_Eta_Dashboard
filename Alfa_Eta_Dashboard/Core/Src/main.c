@@ -144,7 +144,6 @@ int main(void)
   // IMPOTANT : Call after UART initialization (e.g., MX_USARTX_UART_Init())
   Connection_Check = Dashboard_Init(&huart2, &dashboardValues);
   Geo_To_Pixel_Init(&huart3, &MapData);
-  Test(&lon, &lat, gps_storage, &mapx, &mapy);
 
 
 

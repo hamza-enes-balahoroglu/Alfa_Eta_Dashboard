@@ -31,27 +31,33 @@
 #define NEX_SCREEN_SIZE_X 800
 #define NEX_SCREEN_SIZE_Y 480
 
-/* Structure to hold pointers to all dashboard data values */
+/**
+  * @brief  Structure holding pointers to all dashboard variables.
+  *         Used for accessing real-time data.
+  */
 typedef struct {
-    int *speed;
-    int *batteryValue;
-    int *powerKW; 		// 0-6
-    int *packVoltage;
-    int *maxVoltage;
-    int *minVoltage;
-    int *batteryTemp;
-    MapOffset *mapData;
-    int *gear;         // 0: N, 1: D, 2: R
-    int *handbrake;    // 0: Off, 1: On
-    int *signalLeft;   // 0/1
-    int *signalRight;  // 0/1
-    int *connWarn;     // 0/1
-    int *battWarn;     // 0/1
-    int *lights;       // 0/1
+    int *speed;              /*!< Vehicle speed in km/h */
+    int *batteryValue;       /*!< Battery charge percentage (0-100) */
+    int *powerKW;            /*!< Power output in kW */
+    int *packVoltage;        /*!< Total battery pack voltage */
+    int *maxVoltage;         /*!< Maximum cell voltage */
+    int *minVoltage;         /*!< Minimum cell voltage */
+    int *batteryTemp;        /*!< Battery temperature in °C */
+    MapOffset *mapData;      /*!< Map informations */
+    int *gear;               /*!< Gear position: 0=N, 1=D, 2=R */
+    int *handbrake;          /*!< Handbrake: 0=Off, 1=On */
+    int *signalLeft;         /*!< Left signal: 0/1 */
+    int *signalRight;        /*!< Right signal: 0/1 */
+    int *connWarn;           /*!< Connection warning: 0/1 */
+    int *battWarn;           /*!< Battery warning: 0/1 */
+    int *lights;             /*!< Lights: 0=Off, 1=On */
 } NEX_Data;
 
 
-/* Structure to cache previous values to all dashboard data values */
+/**
+  * @brief  Structure used to cache previous values of dashboard data.
+  *         Useful for detecting changes.
+  */
 typedef struct {
     int speed;
     int batteryValue;
@@ -70,74 +76,73 @@ typedef struct {
     int lights;
 } NEX_CachedData;
 
+
+/**
+  * @brief  Enumeration of static commands for Nextion display control.
+  */
 typedef enum {
-	/*--------------------- Static Nextion Commands ---------------------*/
-	CONNECTION_OK 					= 0x00U, 	// Handshake command to confirm connection
+    CONNECTION_OK                 = 0x00U, /*!< Connection established */
 
-	/*--------------------- Gear Display ---------------------*/
-	SET_GEAR_DRIVE 					= 0x01U,	// Drive gear icon
-	SET_GEAR_NEUTRAL 				= 0x02U,	// Neutral gear icon
-	SET_GEAR_REVERSE 				= 0x03U,	// Reverse gear icon
+    SET_GEAR_DRIVE                = 0x01U, /*!< Set gear to Drive */
+    SET_GEAR_NEUTRAL              = 0x02U, /*!< Set gear to Neutral */
+    SET_GEAR_REVERSE              = 0x03U, /*!< Set gear to Reverse */
 
-	/*--------------------- Handbrake ---------------------*/
-	SET_HANDBREAK_ON				= 0x04U,	// Handbrake engaged
-	SET_HANDBREAK_OFF				= 0x05U,    // Handbrake released
+    SET_HANDBREAK_ON              = 0x04U, /*!< Handbrake engaged */
+    SET_HANDBREAK_OFF             = 0x05U, /*!< Handbrake released */
 
-	/*--------------------- Signal Lights ---------------------*/
-	SET_SIGNAL_LEFT_ON				= 0x06U,
-	SET_SIGNAL_LEFT_OFF				= 0x07U,
-	SET_SIGNAL_RIGHT_ON				= 0x08U,
-	SET_SIGNAL_RIGHT_OFF			= 0x09U,
+    SET_SIGNAL_LEFT_ON            = 0x06U,
+    SET_SIGNAL_LEFT_OFF           = 0x07U,
+    SET_SIGNAL_RIGHT_ON           = 0x08U,
+    SET_SIGNAL_RIGHT_OFF          = 0x09U,
 
-	/*--------------------- Warning Indicators ---------------------*/
-	SET_CONNECTION_WARNING_ON		= 0x0AU,
-	SET_CONNECTION_WARNING_OFF		= 0x0BU,
-	SET_BATTERY_WARNING_ON			= 0x0CU,
-	SET_BATTERY_WARNING_OFF			= 0x0DU,
+    SET_CONNECTION_WARNING_ON     = 0x0AU,
+    SET_CONNECTION_WARNING_OFF    = 0x0BU,
+    SET_BATTERY_WARNING_ON        = 0x0CU,
+    SET_BATTERY_WARNING_OFF       = 0x0DU,
 
-	/*--------------------- Lights ---------------------*/
-	SET_LIGHTS_ON					= 0x0EU,
-	SET_LIGHTS_OFF					= 0x0FU
+    SET_LIGHTS_ON                 = 0x0EU,
+    SET_LIGHTS_OFF                = 0x0FU
 
 } NEX_CommandID;
 
-extern const char *NEX_Command[];
 
+/**
+  * @brief  Enumeration of numeric/value-based commands for Nextion display.
+  */
 typedef enum {
-	/*--------------------- Speed Display ---------------------*/
-	SET_SPEED_COMMAND				= 0x00U,  	// Speed number (e.g., RPM, km/h)
+    SET_SPEED_COMMAND             = 0x00U, /*!< Update speed value */
 
-	/*--------------------- Battery Display ---------------------*/
-	SET_BATTERY_NUMBER_COMMAND		= 0x01U,   	// Battery value (number)
-	SET_BATTERY_PROGRESS_BAR_COMMAND= 0x02U, 	// Battery bar (percentage)
+    SET_BATTERY_NUMBER_COMMAND    = 0x01U, /*!< Update battery percentage */
+    SET_BATTERY_PROGRESS_BAR_COMMAND = 0x02U, /*!< Update battery bar */
 
-	/*--------------------- Power Display ---------------------*/
-	SET_KW_NUMBER_COMMAND			= 0x03U,   	// Power in kW
-	SET_KW_PROGRESS_BAR_COMMAND		= 0x04U,   	// Power as progress bar
+    SET_KW_NUMBER_COMMAND         = 0x03U, /*!< Update power kW value */
+    SET_KW_PROGRESS_BAR_COMMAND   = 0x04U, /*!< Update kW bar */
 
-	/*--------------------- Voltage Display ---------------------*/
-	SET_PACK_VOLTAGE				= 0x05U,	// Total battery voltage
-	SET_MAX_VOLTAGE					= 0x06U,	// Maximum battery voltage
-	SET_MIN_VOLTAGE					= 0x07U,    // Minimum battery voltage
+    SET_PACK_VOLTAGE              = 0x05U, /*!< Update total voltage */
+    SET_MAX_VOLTAGE               = 0x06U, /*!< Update max cell voltage */
+    SET_MIN_VOLTAGE               = 0x07U, /*!< Update min cell voltage */
 
-	/*--------------------- Temperature ---------------------*/
-	SET_BATTERY_TEMPERATURE			= 0x08U,   	// Battery temperature
+    SET_BATTERY_TEMPERATURE       = 0x08U, /*!< Update battery temperature */
 
-	/*--------------------- Temperature ---------------------*/
-	SET_MAP_X						= 0x09U,   	// Map x value
-	SET_MAP_Y						= 0x0AU,   	// Map y value
-	SET_MAP_ICON					= 0x0BU,
-	SET_MAP_LAP						= 0x0CU
+    SET_MAP_X                     = 0x09U, /*!< Update map X position */
+    SET_MAP_Y                     = 0x0AU, /*!< Update map Y position */
+    SET_MAP_ICON                  = 0x0BU, /*!< Update vehicle icon rotation */
+    SET_MAP_LAP                   = 0x0CU  /*!< Update lap counter */
 } NEX_Int_Command_ID;
+
+
+/**
+  * @brief  Enumeration for progress bar direction on the display.
+  */
+typedef enum {
+    PROGRESS_BAR_REVERSE          = 0x01U, /*!< Progress bar from full to empty */
+    PROGRESS_BAR_NO_REVERSE       = 0x02U  /*!< Progress bar from empty to full */
+} NEX_ProgressBar_Rotation;
+
+
+/*--------------------- External Variables ---------------------*/
+extern const char *NEX_Command[];
 extern const char *NEX_Int_Command[];
-
-
-/*--------------------- Progress Bar ---------------------*/
-typedef enum
-{
-   PROGRESS_BAR_REVERSE     		= 0x01U,  	// Used to reverse the progress bar direction (100 to 0)
-   PROGRESS_BAR_NO_REVERSE			= 0x02U  	// Used for normal progress bar direction (0 to 100)
-}NEX_ProgressBar_Rotation;
 
 
 /*--------------------- Function Prototypes ---------------------*/

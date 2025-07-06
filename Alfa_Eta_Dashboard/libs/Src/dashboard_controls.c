@@ -1,16 +1,30 @@
 /**
  ******************************************************************************
  * @file           : Dashboard_controls.c
- * @brief          : Sending Nextion commands via UART
+ * @brief          : Sending commands to Nextion display via UART - STM32 HAL compatible
  ******************************************************************************
- * @details
- * This file is designed to send string and numeric data to the Nextion display
- * using STM32 HAL libraries via UART.
+ * @author         : Hamza Enes Balahoroğlu
+ * @version        : v1.0
+ * @date           : 09.06.2025
  *
- * It includes helper functions for UART communication with the Nextion display.
+ * @details
+ * This file contains the implementation of helper functions to interface with
+ * a Nextion display using STM32 HAL UART libraries.
+ *
+ * It includes:
+ *  - Sending pre-defined string commands to control dashboard elements
+ *  - Sending numeric values (e.g., speed, battery) to corresponding objects
+ *  - Handling UI updates like gear state, signals, warnings, and progress bars
+ *
+ * Designed for use with STM32CubeIDE and STM32 HAL libraries.
+ *
+ * @note
+ * Dashboard_Init() must be called after MX_USARTx_UART_Init() to ensure
+ * correct UART communication. Otherwise, command transmission may fail.
  *
  ******************************************************************************
  */
+
 
 #include "dashboard_controls.h"
 
