@@ -1,3 +1,22 @@
+/**
+ ******************************************************************************
+ * @file           : geo_to_pixel.h
+ * @brief          : GPS coordinate to pixel conversion module - STM32 HAL compatible
+ ******************************************************************************
+ * @author         : Hamza Enes Balahoroğlu
+ * @version        : v1.0
+ * @date           : 25.06.2025
+ *
+ * @note
+ * This header file provides functions and definitions for converting
+ * GPS latitude and longitude data into pixel positions on a fixed map.
+ * It includes GPS data filtering and icon angle calculation.
+ *
+ * Designed for use with STM32CubeIDE and STM32 HAL library.
+ *
+ ******************************************************************************
+ */
+
 #ifndef GEO_TO_PIXEL
 #define GEO_TO_PIXEL
 
@@ -6,72 +25,166 @@
 #include <stdlib.h>
 #include <math.h>
 
-#define MAP_X_SIZE 800.00f
-#define MAP_Y_SIZE 750.00f
+/*--------------------- Map Dimensions in Pixels ---------------------*/
+#define MAP_X_SIZE 800.00f    /*!< Map width in pixels */
+#define MAP_Y_SIZE 750.00f    /*!< Map height in pixels */
 
-#define ICON_WIDTH  67
-#define ICON_HEIGHT 67
-#define ICON_X 640
-#define ICON_Y 201
+/*--------------------- Icon Size and Position Constants ---------------------*/
+#define ICON_WIDTH  67        /*!< Width of the icon in pixels */
+#define ICON_HEIGHT 67        /*!< Height of the icon in pixels */
+#define ICON_X 640            /*!< Icon base x-coordinate on map */
+#define ICON_Y 201            /*!< Icon base y-coordinate on map */
 
 /*--------------------- Map Location ---------------------*/
-#define MAP_X_MIN_VAL 0 // Minimum horizontal offset for the background image (fully left)
-#define MAP_X_MAX_VAL 450 // Maximum horizontal offset for the background image (fully right)
-#define MAP_Y_MIN_VAL -270 // Minimum vertical offset for the background image (fully up)
-#define MAP_Y_MAX_VAL 0 // Maximum vertical offset for the background image (fully down)
+#define MAP_X_MIN_VAL 0         /*!< Minimum horizontal offset (fully left) */
+#define MAP_X_MAX_VAL 450       /*!< Maximum horizontal offset (fully right) */
+#define MAP_Y_MIN_VAL -270      /*!< Minimum vertical offset (fully up) */
+#define MAP_Y_MAX_VAL 0         /*!< Maximum vertical offset (fully down) */
 
 
-//,
+
 /*--------------------- Geo Boundaries ---------------------*/
-#define NW_lat 40.809190303f // Latitude (vertical) of the top-left (northwest) corner of the map
-#define NW_lon 29.353690785f // Longitude (horizontal) of the top-left (northwest) corner of the map
-#define SE_lat 40.80401074f // Latitude (vertical) of the bottom-right (southeast) corner of the map
-#define SE_lon 29.36103314f // Longitude (horizontal) of the bottom-right (southeast) corner of the map
+#define NW_lat 40.809190303f     /*!< Latitude of the top-left (NW) corner of the map */
+#define NW_lon 29.353690785f     /*!< Longitude of the top-left (NW) corner of the map */
+#define SE_lat 40.80401074f      /*!< Latitude of the bottom-right (SE) corner of the map */
+#define SE_lon 29.36103314f      /*!< Longitude of the bottom-right (SE) corner of the map */
 
-#define GPS_BUFFER_SIZE 100
+#define GPS_BUFFER_SIZE 100      /*!< Size of UART GPS data buffer */
 
 typedef struct {
-    int PixelX;
-    int PixelY;
-    int IconAngle;
-    int Lap;
+    int PixelX;                 /*!< Pixel X coordinate on the map */
+    int PixelY;                 /*!< Pixel Y coordinate on the map */
+    int IconAngle;              /*!< Orientation angle of the icon in degrees */
+    int Lap;                    /*!< Current lap or iteration count */
 } MapOffset;
 
-
 typedef struct {
-    float raw_lat;
-    float raw_lon;
-    float last_lat;
-    float last_lon;
-    float filtered_lat;
-    float filtered_lon;
-    float speed;      // km/h
+    float raw_lat;              /*!< Raw latitude value from GPS */
+    float raw_lon;              /*!< Raw longitude value from GPS */
+    float last_lat;             /*!< Last filtered latitude */
+    float last_lon;             /*!< Last filtered longitude */
+    float filtered_lat;         /*!< Filtered latitude for smoothing */
+    float filtered_lon;         /*!< Filtered longitude for smoothing */
+    float speed;                /*!< Speed in km/h */
 } GPS_Data;
 
-void Test(float *lon, float *lat, char *test, float *testx, float *testy);
 
 
-
+/**
+  * @brief  Initializes the Geo to Pixel conversion module.
+  *         Sets up UART handler and map data pointers.
+  * @param  uart: Pointer to UART_HandleTypeDef for GPS communication.
+  * @param  mapData: Pointer to MapOffset structure to hold map coordinates.
+  * @retval None
+  */
 void Geo_To_Pixel_Init(UART_HandleTypeDef *uart, MapOffset *mapData);
 
+/**
+  * @brief  Binds UART handle and map data structure pointers for geolocation processing.
+  *         Must be called before starting geo-to-pixel calculations.
+  * @param  uart: Pointer to initialized UART_HandleTypeDef for GPS communication.
+  * @param  mapData: Pointer to MapOffset structure to store computed pixel positions and icon angle.
+  * @retval None
+  */
 void Geo_To_Pixel_Bind(UART_HandleTypeDef *uart, MapOffset *mapData);
 
+/**
+  * @brief  Runs the complete geolocation processing pipeline.
+  *         Reads GPS data, filters it, converts coordinates to pixel values,
+  *         and calculates the icon angle for display.
+  *
+  * @retval None
+  */
 void Run_GeoPipeline(void);
 
+/**
+  * @brief  Reads GPS data from UART buffer and parses $GNRMC NMEA sentence.
+  *         Converts latitude and longitude from NMEA format to decimal degrees,
+  *         and updates global GPS data structure with raw coordinates and speed.
+  *
+  * @note   Parses only first valid $GNRMC sentence found in UART buffer.
+  *
+  * @retval None
+  */
 void Read_GPS_Location(void);
 
+/**
+  * @brief  Converts NMEA latitude or longitude string to decimal degrees.
+  *
+  * @param  nmea: Pointer to NMEA coordinate string (format: ddmm.mmmm or dddmm.mmmm).
+  * @retval Converted coordinate as float in decimal degrees.
+  */
 float NMEA_To_Decimal(char *nmea);
 
+/**
+  * @brief  Applies a simple distance-based filter to GPS coordinates.
+  *         Updates filtered values only if movement exceeds threshold.
+  *
+  * @param  gps: Pointer to GPS_Data structure containing raw and filtered values.
+  * @retval None
+  */
 void GPS_Filter(GPS_Data *gps);
 
+/**
+  * @brief  Calculates the great-circle distance between two GPS coordinates using the Haversine formula.
+  *
+  * @param  lat1: Latitude of the first point in degrees.
+  * @param  lon1: Longitude of the first point in degrees.
+  * @param  lat2: Latitude of the second point in degrees.
+  * @param  lon2: Longitude of the second point in degrees.
+  *
+  * @retval Distance in meters between the two points.
+  */
 float GPS_CalcDistance(float lat1, float lon1, float lat2, float lon2);
 
+/**
+  * @brief  Converts filtered GPS coordinates (latitude, longitude) to pixel positions on the map.
+  *
+  *         Maps the geographic coordinates to corresponding pixel values using defined
+  *         map boundaries and dimensions, then updates drawable positions accordingly.
+  *
+  * @retval None
+  */
 void Calculate_Geo_To_Pixel(void);
 
+/**
+  * @brief  Calculates and clamps the drawable pixel position of the map icon.
+  *
+  *         Translates GPS pixel coordinates into screen pixel positions relative to the icon,
+  *         then clamps them within defined minimum and maximum bounds to prevent overflow.
+  *
+  * @param  gpsPixelX: X coordinate derived from GPS mapping.
+  * @param  gpsPixelY: Y coordinate derived from GPS mapping.
+  * @retval None
+  */
 void Get_Map_Draw_Position(int gpsPixelX, int gpsPixelY);
 
+/**
+  ******************************************************************************
+  * @brief  Calculates the movement direction based on last known pixel position.
+  *
+  *         Computes and updates the icon's heading angle in degrees based on the
+  *         difference between current and previous pixel coordinates.
+  *
+  *         Sets 0° as west and normalizes result to [0, 360).
+  *
+  * @retval None
+  ******************************************************************************
+  */
 void Calculate_Icon_Angle(void);
 
+/**
+  ******************************************************************************
+  * @brief  Maps a float value from one range to another.
+  *
+  * @param  input: The input value to be mapped.
+  * @param  in_min: The minimum value of the input range.
+  * @param  in_max: The maximum value of the input range.
+  * @param  out_min: The minimum value of the target range.
+  * @param  out_max: The maximum value of the target range.
+  * @retval float: The mapped output value within the target range.
+  ******************************************************************************
+  */
 float Map_Float(float input, float in_min, float in_max, float out_min, float out_max);
 
 #endif // GEO_TO_PIXEL
