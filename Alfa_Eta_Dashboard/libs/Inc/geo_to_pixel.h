@@ -20,11 +20,13 @@
 #define MAP_Y_MIN_VAL -270 // Minimum vertical offset for the background image (fully up)
 #define MAP_Y_MAX_VAL 0 // Maximum vertical offset for the background image (fully down)
 
+
+//,
 /*--------------------- Geo Boundaries ---------------------*/
-#define NW_lat 40.824772493f // Latitude (vertical) of the top-left (northwest) corner of the map
-#define NW_lon 29.417859918f // Longitude (horizontal) of the top-left (northwest) corner of the map
-#define SE_lat 40.822593887f // Latitude (vertical) of the bottom-right (southeast) corner of the map
-#define SE_lon 29.420935394f // Longitude (horizontal) of the bottom-right (southeast) corner of the map
+#define NW_lat 40.809190303f // Latitude (vertical) of the top-left (northwest) corner of the map
+#define NW_lon 29.353690785f // Longitude (horizontal) of the top-left (northwest) corner of the map
+#define SE_lat 40.80401074f // Latitude (vertical) of the bottom-right (southeast) corner of the map
+#define SE_lon 29.36103314f // Longitude (horizontal) of the bottom-right (southeast) corner of the map
 
 #define GPS_BUFFER_SIZE 100
 
