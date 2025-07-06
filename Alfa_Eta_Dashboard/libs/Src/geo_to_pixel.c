@@ -13,7 +13,11 @@ static MapOffset _mapCachedData = {
 };
 
 static GPS_Data _gpsData ={
-		.speed		= 0.00f
+		.speed		= 0.00f,
+		.last_lat 	= 0.00f,
+		.last_lon 	= 0.00f,
+		.raw_lat 	= 0.00f,
+		.raw_lon	= 0.00f
 };
 
 void Geo_To_Pixel_Init(UART_HandleTypeDef *uart, MapOffset *mapData){
@@ -151,7 +155,7 @@ void GPS_Filter(GPS_Data *gps)
 {
     float dist = GPS_CalcDistance(gps->raw_lat, gps->raw_lon, gps->last_lat, gps->last_lon);
 
-    if (gps->speed < 1.0f || dist < 3.0f) {
+    if ( dist < 3.0f) { //gps->speed < 1.0f ||
         // sabitsin, eski değerleri kullan
         gps->filtered_lat = gps->last_lat;
         gps->filtered_lon = gps->last_lon;
