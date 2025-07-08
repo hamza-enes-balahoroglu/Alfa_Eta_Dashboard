@@ -47,13 +47,6 @@ UART_HandleTypeDef huart3;
 /* USER CODE BEGIN PV */
 int count = 0;
 
-float lon;
-float lat;
-float mapx;
-float mapy;
-char gps_test[GPS_BUFFER_SIZE];
-char gps_storage[100];
-
 
 HAL_StatusTypeDef Connection_Check;
 int speed,
