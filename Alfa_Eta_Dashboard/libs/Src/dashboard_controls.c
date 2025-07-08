@@ -4,7 +4,7 @@
  * @brief          : Sending commands to Nextion display via UART - STM32 HAL compatible
  ******************************************************************************
  * @author         : Hamza Enes Balahoroğlu
- * @version        : v1.0
+ * @version        : v1.1
  * @date           : 09.06.2025
  *
  * @details
@@ -327,39 +327,6 @@ HAL_StatusTypeDef Send_Nextion_Progress_Bar(NEX_Int_Command_ID cmdID, int val, i
     } else {
         return HAL_ERROR;  // Value out of range
     }
-}
-
-/**
-  * @brief  Maps an integer value from one range to another using linear interpolation.
-  *
-  *         Formula used:
-  *         y = (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
-  *
-  *         Useful when scaling sensor data, UI inputs or any raw value from hardware.
-  *
-  * @param  input:       Integer value to be scaled.
-  * @param  in_min:      Lower bound of input range.
-  * @param  in_max:      Upper bound of input range.
-  * @param  out_min:     Lower bound of target range.
-  * @param  out_max:     Upper bound of target range.
-  *
-  * @retval int:         Scaled result within the specified output range.
-  *
-  * @note   Integer division is used; fractional precision is discarded.
-  *         Make sure (in_max - in_min) ≠ 0 to avoid division by zero.
-  */
-int Map_Int(int input, int in_min, int in_max, int out_min, int out_max)
-{
-    //uint32_t input_range = in_max - in_min + 1;
-    //uint32_t ref_range = out_max - out_min + 1;
-
-    //return ((ref_range * (input - in_min)) / input_range) + out_min;
-
-
-    int input_range = in_max - in_min;
-    int output_range = out_max - out_min;
-
-    return ((input - in_min) * output_range) / input_range + out_min;
 }
 
 /**

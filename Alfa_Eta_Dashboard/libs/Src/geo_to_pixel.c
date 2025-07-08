@@ -4,7 +4,7 @@
  * @brief          : Implementation of GPS to pixel coordinate conversion - STM32 HAL compatible
  ******************************************************************************
  * @author         : Hamza Enes Balahoroğlu
- * @version        : v1.0
+ * @version        : v1.1
  * @date           : 25.06.2025
  *
  * @details
@@ -353,29 +353,4 @@ void Calculate_Icon_Angle(void) {
 		_mapCachedData.PixelX = _mapData->PixelX;
 		_mapCachedData.PixelY = _mapData->PixelY;
 	}
-}
-
-/**
-  * @brief  Performs linear mapping of a float value from one range to another.
-  *
-  *         This function scales the input from the input range [in_min, in_max]
-  *         to the output range [out_min, out_max] using the formula:
-  *
-  *         out = ((out_max - out_min) * (input - in_min)) / (in_max - in_min) + out_min
-  *
-  *         Useful for normalizing or converting sensor values to UI units, percentages, etc.
-  *
-  * @param  input: Input value to be mapped.
-  * @param  in_min: Minimum bound of the input range.
-  * @param  in_max: Maximum bound of the input range.
-  * @param  out_min: Minimum bound of the output range.
-  * @param  out_max: Maximum bound of the output range.
-  * @retval float: Mapped output value.
-  */
-float Map_Float(float input, float in_min, float in_max, float out_min, float out_max)
-{
-    float input_range = in_max - in_min;
-    float ref_range = out_max - out_min;
-
-    return ((ref_range * (input - in_min)) / input_range) + out_min;
 }

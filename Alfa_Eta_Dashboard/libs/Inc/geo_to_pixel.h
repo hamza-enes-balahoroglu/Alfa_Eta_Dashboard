@@ -4,7 +4,7 @@
  * @brief          : GPS coordinate to pixel conversion module - STM32 HAL compatible
  ******************************************************************************
  * @author         : Hamza Enes Balahoroğlu
- * @version        : v1.0
+ * @version        : v1.1
  * @date           : 25.06.2025
  *
  * @note
@@ -21,6 +21,7 @@
 #define GEO_TO_PIXEL
 
 #include "stm32f4xx_hal.h"
+#include "mapping.h"
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
@@ -172,19 +173,5 @@ void Get_Map_Draw_Position(int gpsPixelX, int gpsPixelY);
   ******************************************************************************
   */
 void Calculate_Icon_Angle(void);
-
-/**
-  ******************************************************************************
-  * @brief  Maps a float value from one range to another.
-  *
-  * @param  input: The input value to be mapped.
-  * @param  in_min: The minimum value of the input range.
-  * @param  in_max: The maximum value of the input range.
-  * @param  out_min: The minimum value of the target range.
-  * @param  out_max: The maximum value of the target range.
-  * @retval float: The mapped output value within the target range.
-  ******************************************************************************
-  */
-float Map_Float(float input, float in_min, float in_max, float out_min, float out_max);
 
 #endif // GEO_TO_PIXEL

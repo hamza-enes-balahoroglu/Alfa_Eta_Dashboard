@@ -4,7 +4,7 @@
  * @brief          : Nextion display control library - STM32 HAL compatible
  ******************************************************************************
  * @author         : Hamza Enes Balahoroglu
- * @version        : v1.0
+ * @version        : v1.1
  * @date           : 09.06.2025
  *
  * @note
@@ -25,6 +25,7 @@
 
 #include "stm32f4xx_hal.h"
 #include "geo_to_pixel.h"
+#include "mapping.h"
 #include <string.h>
 #include <stdio.h>
 
