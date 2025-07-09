@@ -54,15 +54,28 @@ static GPS_Data _gpsData = {
     .raw_lon    = 0.00f
 };
 
+/**
+ * @brief Array of GPS checkpoints representing key locations on the track.
+ *
+ * Each checkpoint holds a status flag (0 = not reached, 1 = reached),
+ * along with latitude and longitude coordinates.
+ */
 static GPS_Checkpoint Checkpoints[3] = {
     {.status = 0, .lat = 40.12345f, .lon = 29.12345f},  // Start point
 	{.status = 0, .lat = 40.12345f, .lon = 29.12345f},
 	{.status = 0, .lat = 40.12345f, .lon = 29.12345f},
 };
 
+/**
+ * @brief Number of checkpoints in the Checkpoints array.
+ */
 #define NUM_CHECKPOINTS (sizeof(Checkpoints)/sizeof(Checkpoints[0]))
 
+/**
+ * @brief Flag indicating whether a lap has started (1) or not (0).
+ */
 static uint8_t Is_Lap_Started = 0;
+
 
 /**
   * @brief  Initializes internal bindings for geolocation processing.

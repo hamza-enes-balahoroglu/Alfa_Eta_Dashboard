@@ -69,10 +69,14 @@ typedef struct {
     float speed;                /*!< Speed in km/h */
 } GPS_Data;
 
+
+/**
+ * @brief Structure to represent a GPS checkpoint with status and coordinates.
+ */
 typedef struct {
-	uint8_t status;
-	float lat;
-	float lon;
+    uint8_t status;             /*!< Checkpoint status: 0 = not reached, 1 = reached */
+    float lat;                  /*!< Latitude of the checkpoint */
+    float lon;                  /*!< Longitude of the checkpoint */
 } GPS_Checkpoint;
 
 
