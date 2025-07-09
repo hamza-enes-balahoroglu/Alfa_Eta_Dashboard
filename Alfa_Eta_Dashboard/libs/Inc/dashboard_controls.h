@@ -228,16 +228,6 @@ HAL_StatusTypeDef Send_Nextion_Progress_Bar(NEX_Int_Command_ID cmd, int val, int
 HAL_StatusTypeDef Nextion_Handshake(uint32_t timeout);
 
 /**
-  * @brief  Sends the standard 3-byte command terminator to the Nextion display.
-  *
-  * @note   Nextion protocol requires every command to end with 0xFF 0xFF 0xFF.
-  *         This function transmits those bytes over the selected UART.
-  *
-  * @retval None
-  */
-void Command_Terminator(void);
-
-/**
   * @brief  Maps an integer input value from one range to another.
   *
   * @param  input:       Value to be mapped.

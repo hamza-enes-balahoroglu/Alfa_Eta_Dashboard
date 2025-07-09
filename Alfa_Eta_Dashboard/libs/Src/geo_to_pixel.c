@@ -149,7 +149,7 @@ void Run_GeoPipeline(void){
   *
   * @retval HAL_OK if a valid $GNRMC sentence is found and parsed, otherwise HAL_ERROR.
   */
-HAL_StatusTypeDef Read_GPS_Location(void) {
+static HAL_StatusTypeDef Read_GPS_Location(void) {
     float latitude = 0.0f, longitude = 0.0f;
 
     // Clear GPS UART buffer
@@ -238,7 +238,7 @@ HAL_StatusTypeDef Read_GPS_Location(void) {
   * @param  nmea: NMEA coordinate string (e.g. "4916.45" or "12311.12").
   * @retval Decimal degrees as float.
   */
-float NMEA_To_Decimal(char *nmea) {
+static float NMEA_To_Decimal(char *nmea) {
     if (nmea == NULL) return 0.0f;
 
     int degrees = 0;
@@ -265,7 +265,7 @@ float NMEA_To_Decimal(char *nmea) {
   * @param  gps: Pointer to GPS_Data struct containing raw, filtered, and last coordinates.
   * @retval None
   */
-void GPS_Filter(GPS_Data *gps)
+static void GPS_Filter(GPS_Data *gps)
 {
     float dist = GPS_CalcDistance(gps->raw_lat, gps->raw_lon, gps->last_lat, gps->last_lon);
 
@@ -295,7 +295,7 @@ void GPS_Filter(GPS_Data *gps)
   *
   * @retval Distance in meters.
   */
-float GPS_CalcDistance(float lat1, float lon1, float lat2, float lon2)
+static float GPS_CalcDistance(float lat1, float lon1, float lat2, float lon2)
 {
     const float R = 6371000.0f; // earth radius in meters
     float dLat = (lat2 - lat1) * (M_PI / 180.0f);
@@ -314,7 +314,7 @@ float GPS_CalcDistance(float lat1, float lon1, float lat2, float lon2)
   *         Updates drawable position based on mapped pixel values.
   * @retval None
   */
-void Calculate_Geo_To_Pixel(void){
+static void Calculate_Geo_To_Pixel(void){
 	float mappedXf = Map_Float(_gpsData.filtered_lon, NW_lon, SE_lon, 0.00f , MAP_X_SIZE);
 	int mappedX = (int)mappedXf;
 
@@ -338,7 +338,7 @@ void Calculate_Geo_To_Pixel(void){
   *
   * @retval None
   */
-void Get_Map_Draw_Position(int gpsPixelX, int gpsPixelY) {
+static void Get_Map_Draw_Position(int gpsPixelX, int gpsPixelY) {
 	int pixelX, pixelY;
 
 	pixelX = ICON_X + (int)(ICON_WIDTH/2) - gpsPixelX;
@@ -377,7 +377,7 @@ void Get_Map_Draw_Position(int gpsPixelX, int gpsPixelY) {
   *
   * @retval None
   */
-void Calculate_Icon_Angle(void) {
+static void Calculate_Icon_Angle(void) {
 
 	if (_mapCachedData.PixelX != _mapData->PixelX || _mapCachedData.PixelY != _mapData->PixelY){
 

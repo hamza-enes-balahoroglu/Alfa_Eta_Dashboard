@@ -361,7 +361,7 @@ HAL_StatusTypeDef Send_Nextion_Progress_Bar(NEX_Int_Command_ID cmdID, int val, i
   *
   * @retval None
   */
-void Command_Terminator(void){
+static void Command_Terminator(void){
     HAL_UART_Transmit(_uart, (uint8_t*)COMMAND_END, sizeof(COMMAND_END), 100);
 }
 
