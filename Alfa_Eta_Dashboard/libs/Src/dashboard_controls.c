@@ -28,75 +28,95 @@
 
 #include "dashboard_controls.h"
 
+/**
+ * @brief Static Nextion command strings for various dashboard controls.
+ *
+ * These strings are sent as-is to the Nextion display to set icons,
+ * visibility, or states for gears, handbrake, signals, warnings, and lights.
+ */
 const char *NEX_Command[] = {
-	/*--------------------- Static Nextion Commands ---------------------*/
-	"con=1",  // Handshake command to confirm connection
-	/*--------------------- Gear Display ---------------------*/
-	"pGr.pic=19",     // Drive gear icon
-	"pGr.pic=20",   // Neutral gear icon
-	"pGr.pic=21",   // Reverse gear icon
+    /* Handshake command */
+    "con=1",
 
-	/*--------------------- Handbrake ---------------------*/
-	"pHb.aph=127",   // Handbrake engaged
-	"pHb.aph=0",    // Handbrake released
+    /* Gear Display commands */
+    "pGr.pic=19",     // Drive gear icon
+    "pGr.pic=20",     // Neutral gear icon
+    "pGr.pic=21",     // Reverse gear icon
 
-	/*--------------------- Signal Lights ---------------------*/
-	"pSL.aph=127",
-	"pSL.aph=0",
-	"pSR.aph=127",
-	"pSR.aph=0",
+    /* Handbrake commands */
+    "pHb.aph=127",    // Handbrake engaged (opaque)
+    "pHb.aph=0",      // Handbrake released (transparent)
 
-	/*--------------------- Warning Indicators ---------------------*/
-	"pCW.aph=127",
-	"pCW.aph=0",
-	"pBW.aph=127",
-	"pBW.aph=0",
+    /* Signal Lights commands */
+    "pSL.aph=127",    // Left signal ON
+    "pSL.aph=0",      // Left signal OFF
+    "pSR.aph=127",    // Right signal ON
+    "pSR.aph=0",      // Right signal OFF
 
-	/*--------------------- Lights ---------------------*/
-	"pLt.aph=127",
-	"pLt.aph=0",
+    /* Warning Indicators commands */
+    "pCW.aph=127",    // Connection warning ON
+    "pCW.aph=0",      // Connection warning OFF
+    "pBW.aph=127",    // Battery warning ON
+    "pBW.aph=0",      // Battery warning OFF
+
+    /* Lights commands */
+    "pLt.aph=127",    // Lights ON
+    "pLt.aph=0",      // Lights OFF
 };
 
 
+/**
+ * @brief Parameterized Nextion command strings for numeric values.
+ *
+ * These strings contain format specifiers for integer values (%d),
+ * which will be replaced by actual data before sending.
+ */
 const char *NEX_Int_Command[] = {
-	/*--------------------- Speed Display ---------------------*/
-	"nSd.val=%d",  // Speed number (e.g., RPM, km/h)
 
-	/*--------------------- Battery Display ---------------------*/
-	"nBt.val=%d",     // Battery value (number)
-	"jBt.val=%d", // Battery bar (percentage)
+    /* Speed Display */
+    "nSd.val=%d",      // Speed number (km/h)
 
-	/*--------------------- Power Display ---------------------*/
-	"nKW.val=%d",          // Power in kW
-	"jKW.val=%d",    // Power as progress bar
+    /* Battery Display */
+    "nBt.val=%d",      // Battery value (number)
+    "jBt.val=%d",      // Battery progress bar (percentage)
 
-	/*--------------------- Voltage Display ---------------------*/
-	"xBV.val=%d",   // Total battery voltage
-	"xBMa.val=%d",      // Maximum battery voltage
-	"xBMi.val=%d",      // Minimum battery voltage
+    /* Power Display */
+    "nKW.val=%d",      // Power in kW
+    "jKW.val=%d",      // Power progress bar
 
-	/*--------------------- Temperature ---------------------*/
-	"xBtT.val=%d",  // Battery temperature
+    /* Voltage Display */
+    "xBV.val=%d",      // Total battery voltage
+    "xBMa.val=%d",     // Maximum battery voltage
+    "xBMi.val=%d",     // Minimum battery voltage
 
+    /* Battery Temperature */
+    "xBtT.val=%d",     // Battery temperature
 
-	/*--------------------- Map ---------------------*/
-	"pMap.x=%d",  // Map x value
-	"pMap.y=%d",  // Map y value
-	"zIc.val=%d", // Icon direction
-	"nLap.val=%d" // Lap counter
+    /* Map Controls */
+    "pMap.x=%d",       // Map X coordinate
+    "pMap.y=%d",       // Map Y coordinate
+    "zIc.val=%d",      // Icon direction
+    "nLap.val=%d"      // Lap counter
 };
 
-
-/* Global pointer to UART handle used for communication */
+/**
+ * @brief Pointer to the UART handle used for Nextion communication.
+ */
 static UART_HandleTypeDef *_uart;
 
-/* Global pointer to binded data */
+/**
+ * @brief Pointer to the structure holding dashboard data bindings.
+ */
 static NEX_Data *_dashboard = NULL;
 
-/* Holds previous values to compare and avoid redundant updates */
+/**
+ * @brief Cache structure holding previous dashboard values to avoid redundant UART transmissions.
+ */
 static NEX_CachedData _previousValues = {0};
 
-/* 3-byte terminator required for every Nextion command */
+/**
+ * @brief Nextion command terminator: 3-byte sequence required to mark end of commands.
+ */
 static const uint8_t COMMAND_END[3] = {0xFF, 0xFF, 0xFF};
 
 /**
