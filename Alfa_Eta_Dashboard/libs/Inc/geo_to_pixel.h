@@ -4,7 +4,7 @@
  * @brief          : GPS coordinate to pixel conversion module - STM32 HAL compatible
  ******************************************************************************
  * @author         : Hamza Enes Balahoroğlu
- * @version        : v1.2
+ * @version        : v1.3
  * @date           : 25.06.2025
  *
  * @note
@@ -101,20 +101,19 @@ void Geo_To_Pixel_Bind(UART_HandleTypeDef *uart, MapOffset *mapData);
 /**
   * @brief  Runs the complete geolocation processing pipeline.
   *         Reads GPS data, filters it, converts coordinates to pixel values,
-  *         and calculates the icon angle for display.
+  *         calculates icon angle for display, and checks lap completion.
   *
   * @retval None
   */
 void Run_GeoPipeline(void);
 
 /**
-  * @brief  Reads GPS data from UART buffer and parses $GNRMC NMEA sentence.
-  *         Converts latitude and longitude from NMEA format to decimal degrees,
-  *         and updates global GPS data structure with raw coordinates and speed.
+  * @brief  Reads raw GPS data from UART and extracts geolocation info.
   *
-  * @note   Parses only first valid $GNRMC sentence found in UART buffer.
+  * @note   Parses the $GNRMC NMEA sentence to get latitude, longitude,
+  *         and speed. Updates the internal _gpsData structure.
   *
-  * @retval None
+  * @retval HAL_OK if valid data is parsed, otherwise HAL_ERROR.
   */
 HAL_StatusTypeDef Read_GPS_Location(void);
 

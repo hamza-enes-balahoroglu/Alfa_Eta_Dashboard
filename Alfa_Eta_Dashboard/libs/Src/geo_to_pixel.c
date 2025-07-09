@@ -4,7 +4,7 @@
  * @brief          : Implementation of GPS to pixel coordinate conversion - STM32 HAL compatible
  ******************************************************************************
  * @author         : Hamza Enes Balahoroğlu
- * @version        : v1.2
+ * @version        : v1.3
  * @date           : 25.06.2025
  *
  * @details
@@ -29,15 +29,26 @@
 #include "geo_to_pixel.h"
 
 /* Private variables ---------------------------------------------------------*/
+
+/**
+ * @brief UART handle used for GPS communication.
+ */
 static UART_HandleTypeDef *_uart = NULL;
 
-/* Buffer to store raw GPS data received via UART */
+/**
+ * @brief Buffer to store raw NMEA sentences received from the GPS module.
+ */
 char gps_buffer[GPS_BUFFER_SIZE];
 
-/* Pointer to external map data structure */
+/**
+ * @brief  Pointer to the external map data structure used to update display elements such as position,
+ * 		   direction, and lap count.
+ */
 static MapOffset *_mapData = NULL;
 
-/* Cached map data for angle calculation and change detection */
+/**
+ * @brief Cached version of the map data used for detecting visual updates (e.g. angle, position).
+ */
 static MapOffset _mapCachedData = {
     .PixelX     = 0,
     .PixelY     = 0,
@@ -45,7 +56,9 @@ static MapOffset _mapCachedData = {
     .Lap        = 0,
 };
 
-/* GPS data with raw, filtered coordinates and speed */
+/**
+ * @brief Internal GPS data structure containing raw and filtered coordinates, as well as speed.
+ */
 static GPS_Data _gpsData = {
     .speed      = 0.00f,
     .last_lat   = 0.00f,
@@ -104,8 +117,9 @@ void Geo_To_Pixel_Bind(UART_HandleTypeDef *uart, MapOffset *mapData){
   * @brief  Executes the full geolocation update sequence:
   *         - Reads raw GPS data via UART
   *         - Applies GPS filtering to reduce noise
-  *         - Converts filtered GPS coordinates to pixel positions on map
+  *         - Converts filtered GPS coordinates to pixel positions on the map
   *         - Calculates the orientation angle of the map icon based on movement
+  *         - Checks if a full lap is completed and updates lap count accordingly
   *
   * @retval None
   */
@@ -132,7 +146,7 @@ void Run_GeoPipeline(void){
   * @note   Uses internal global buffer 'gps_buffer' to store received UART data.
   *         Updates raw_lat, raw_lon, and speed fields in _gpsData.
   *
-  * @retval None
+  * @retval HAL_OK if a valid $GNRMC sentence is found and parsed, otherwise HAL_ERROR.
   */
 HAL_StatusTypeDef Read_GPS_Location(void) {
     float latitude = 0.0f, longitude = 0.0f;
