@@ -4,7 +4,7 @@
  * @brief          : GPS coordinate to pixel conversion module - STM32 HAL compatible
  ******************************************************************************
  * @author         : Hamza Enes Balahoroğlu
- * @version        : v1.1
+ * @version        : v1.2
  * @date           : 25.06.2025
  *
  * @note
@@ -69,6 +69,11 @@ typedef struct {
     float speed;                /*!< Speed in km/h */
 } GPS_Data;
 
+typedef struct {
+	uint8_t status;
+	float lat;
+	float lon;
+} GPS_Checkpoint;
 
 
 /**
@@ -107,7 +112,7 @@ void Run_GeoPipeline(void);
   *
   * @retval None
   */
-void Read_GPS_Location(void);
+HAL_StatusTypeDef Read_GPS_Location(void);
 
 /**
   * @brief  Converts NMEA latitude or longitude string to decimal degrees.
@@ -174,4 +179,9 @@ void Get_Map_Draw_Position(int gpsPixelX, int gpsPixelY);
   */
 void Calculate_Icon_Angle(void);
 
+static void Count_Lap(void);
+
+static uint8_t Is_Lap_Complete(void);
+
+static void Clear_Checkpoints(void);
 #endif // GEO_TO_PIXEL

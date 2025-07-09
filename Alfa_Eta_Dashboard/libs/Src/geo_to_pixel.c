@@ -4,7 +4,7 @@
  * @brief          : Implementation of GPS to pixel coordinate conversion - STM32 HAL compatible
  ******************************************************************************
  * @author         : Hamza Enes Balahoroğlu
- * @version        : v1.1
+ * @version        : v1.2
  * @date           : 25.06.2025
  *
  * @details
@@ -54,6 +54,16 @@ static GPS_Data _gpsData = {
     .raw_lon    = 0.00f
 };
 
+static GPS_Checkpoint Checkpoints[3] = {
+    {.status = 0, .lat = 40.12345f, .lon = 29.12345f},  // Start point
+	{.status = 0, .lat = 40.12345f, .lon = 29.12345f},
+	{.status = 0, .lat = 40.12345f, .lon = 29.12345f},
+};
+
+#define NUM_CHECKPOINTS (sizeof(Checkpoints)/sizeof(Checkpoints[0]))
+
+static uint8_t Is_Lap_Started = 0;
+
 /**
   * @brief  Initializes internal bindings for geolocation processing.
   *         Currently calls Geo_To_Pixel_Bind with given parameters.
@@ -87,14 +97,17 @@ void Geo_To_Pixel_Bind(UART_HandleTypeDef *uart, MapOffset *mapData){
   * @retval None
   */
 void Run_GeoPipeline(void){
-	Read_GPS_Location();
 
-	GPS_Filter(&_gpsData);
+	if(Read_GPS_Location() == HAL_OK){
 
-	Calculate_Geo_To_Pixel();
+		GPS_Filter(&_gpsData);
 
-	Calculate_Icon_Angle();
+		Calculate_Geo_To_Pixel();
 
+		Calculate_Icon_Angle();
+
+		Count_Lap();
+	}
 }
 
 /**
@@ -108,7 +121,7 @@ void Run_GeoPipeline(void){
   *
   * @retval None
   */
-void Read_GPS_Location(void) {
+HAL_StatusTypeDef Read_GPS_Location(void) {
     float latitude = 0.0f, longitude = 0.0f;
 
     // Clear GPS UART buffer
@@ -179,12 +192,13 @@ void Read_GPS_Location(void) {
             _gpsData.raw_lat = latitude;
             _gpsData.raw_lon = longitude;
 
-            break; // Valid sentence processed, exit loop
+            return HAL_OK; // Valid sentence processed, exit loop
         }
 
         // Move pointer to search for next $GNRMC sentence
         start += 6; // length of "$GNRMC"
     }
+    return HAL_ERROR;
 }
 
 /**
@@ -352,5 +366,42 @@ void Calculate_Icon_Angle(void) {
 
 		_mapCachedData.PixelX = _mapData->PixelX;
 		_mapCachedData.PixelY = _mapData->PixelY;
+	}
+}
+
+static void Count_Lap(void){
+
+	for (int index=0; index<NUM_CHECKPOINTS; index++){
+		GPS_Checkpoint *point = &Checkpoints[index];
+		float distance = GPS_CalcDistance(point->lat,point->lon, _gpsData.filtered_lat, _gpsData.filtered_lon);
+
+		if(distance < 5.0f){
+			if (index == 0 && Is_Lap_Started == 1){
+
+				point->status = 1;
+
+				if(Is_Lap_Complete() == 1) _mapData->Lap++;
+				Clear_Checkpoints();
+				Is_Lap_Started = 0;
+			}
+			else{
+				Is_Lap_Started = 1;
+				point->status = 1;
+			}
+			break;
+		}
+	}
+}
+
+static uint8_t Is_Lap_Complete(void){
+	for (int index=0; index<sizeof(Checkpoints)/sizeof(Checkpoints[0]); index++){
+		if(Checkpoints[index].status == 0) return 0;
+	}
+	return 1;
+}
+
+static void Clear_Checkpoints(void){
+	for (int index=0; index<sizeof(Checkpoints)/sizeof(Checkpoints[0]); index++){
+		Checkpoints[index].status = 0;
 	}
 }
