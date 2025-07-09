@@ -74,9 +74,9 @@ static GPS_Data _gpsData = {
  * along with latitude and longitude coordinates.
  */
 static GPS_Checkpoint Checkpoints[3] = {
-    {.status = 0, .lat = 40.12345f, .lon = 29.12345f},  // Start point
-	{.status = 0, .lat = 40.12345f, .lon = 29.12345f},
-	{.status = 0, .lat = 40.12345f, .lon = 29.12345f},
+    {.lat = 40.12345f, .lon = 29.12345f},  // Start point
+	{.lat = 40.12345f, .lon = 29.12345f},
+	{.lat = 40.12345f, .lon = 29.12345f},
 };
 
 /**
@@ -99,6 +99,7 @@ static uint8_t Is_Lap_Started = 0;
   */
 void Geo_To_Pixel_Init(UART_HandleTypeDef *uart, MapOffset *mapData){
     Geo_To_Pixel_Bind(uart, mapData);
+    Clear_Checkpoints();
 }
 
 /**
