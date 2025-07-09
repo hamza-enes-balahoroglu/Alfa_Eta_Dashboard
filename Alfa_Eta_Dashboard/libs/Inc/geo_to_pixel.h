@@ -179,9 +179,45 @@ void Get_Map_Draw_Position(int gpsPixelX, int gpsPixelY);
   */
 void Calculate_Icon_Angle(void);
 
+/**
+ ******************************************************************************
+ * @brief Counts laps based on GPS checkpoint proximity
+ * @retval None
+ *
+ * This function compares the current filtered GPS coordinates against
+ * predefined checkpoints. If the distance to any checkpoint is below the
+ * defined threshold (5 meters), it updates the checkpoint status.
+ *
+ * - If the first checkpoint is reached and the lap was already started,
+ *   it checks for lap completion and increments the lap count.
+ * - If another checkpoint is reached, it marks the lap as started.
+ *
+ * Should be called periodically after GPS data is filtered.
+ ******************************************************************************
+ */
 static void Count_Lap(void);
 
+/**
+ ******************************************************************************
+ * @brief  Checks if all GPS checkpoints have been passed
+ * @retval uint8_t: 1 if all checkpoints are passed, 0 otherwise
+ *
+ * This function iterates through the global Checkpoints array to determine
+ * whether all checkpoints have been marked as passed (`status == 1`).
+ *
+ * Typically used inside lap counting logic to verify lap completion.
+ ******************************************************************************
+ */
 static uint8_t Is_Lap_Complete(void);
 
+/**
+ ******************************************************************************
+ * @brief  Resets the status of all GPS checkpoints
+ * @retval None
+ *
+ * Sets all checkpoint status values to 0 in the global `Checkpoints` array.
+ * This is typically used after a lap is completed to prepare for the next one.
+ ******************************************************************************
+ */
 static void Clear_Checkpoints(void);
 #endif // GEO_TO_PIXEL

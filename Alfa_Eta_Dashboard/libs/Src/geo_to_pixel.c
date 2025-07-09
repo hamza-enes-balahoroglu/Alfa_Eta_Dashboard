@@ -369,30 +369,82 @@ void Calculate_Icon_Angle(void) {
 	}
 }
 
-static void Count_Lap(void){
+/**
+ ******************************************************************************
+ * @brief  Checkpoint kontrolü yaparak tur sayısını günceller
+ * @retval None
+ *
+ * This function loops through all predefined GPS checkpoints and calculates
+ * the distance between each checkpoint and the current filtered GPS position.
+ *
+ * - If the current position is within 5 meters of any checkpoint, it sets
+ *   the checkpoint status as passed.
+ *
+ * - If the first checkpoint is reached and a lap has already started, it
+ *   checks whether all other checkpoints have also been passed. If so, it
+ *   increments the lap counter and resets all checkpoint statuses.
+ *
+ * - If the current position is close to any other checkpoint (not the first),
+ *   it marks the lap as started.
+ *
+ * The function uses:
+ *  - `GPS_CalcDistance()` to calculate proximity
+ *  - `Is_Lap_Complete()` to verify lap completion
+ *  - `Clear_Checkpoints()` to reset states
+ *
+ * Typical usage:
+ *  - Call this after filtering GPS data, ideally inside a geo update pipeline.
+ ******************************************************************************
+ */
+static void Count_Lap(void)
+{
+    for (int index = 0; index < NUM_CHECKPOINTS; index++) {
+        GPS_Checkpoint *point = &Checkpoints[index];
+        float distance = GPS_CalcDistance(point->lat, point->lon,
+                                          _gpsData.filtered_lat, _gpsData.filtered_lon);
 
-	for (int index=0; index<NUM_CHECKPOINTS; index++){
-		GPS_Checkpoint *point = &Checkpoints[index];
-		float distance = GPS_CalcDistance(point->lat,point->lon, _gpsData.filtered_lat, _gpsData.filtered_lon);
+        if (distance < 5.0f) { // close enough to a checkpoint
 
-		if(distance < 5.0f){
-			if (index == 0 && Is_Lap_Started == 1){
+            if (index == 0) { // you're at the starting point
 
-				point->status = 1;
+                if (Is_Lap_Started) {
+                    // a lap had already started and you've returned to the starting point
+                    point->status = 1;
 
-				if(Is_Lap_Complete() == 1) _mapData->Lap++;
-				Clear_Checkpoints();
-				Is_Lap_Started = 0;
-			}
-			else{
-				Is_Lap_Started = 1;
-				point->status = 1;
-			}
-			break;
-		}
-	}
+                    if (Is_Lap_Complete()) {
+                        _mapData->Lap++;  // lap completed
+                    }
+
+                    Clear_Checkpoints();
+                    Is_Lap_Started = 0;
+                }
+
+            } else {
+                // not at the starting point yet, but you've reached a checkpoint
+                Is_Lap_Started = 1;
+                point->status = 1;
+            }
+
+            break; // already passed one checkpoint, no need to check the rest
+        }
+    }
 }
 
+/**
+ ******************************************************************************
+ * @brief  Verifies if all GPS checkpoints have been passed
+ * @retval uint8_t
+ *         - 1: All checkpoints are marked as passed
+ *         - 0: At least one checkpoint has not been passed
+ *
+ * This function checks the status of each checkpoint in the `Checkpoints` array.
+ * If any checkpoint has a `status` of 0 (not passed), the function returns 0.
+ * If all checkpoints have `status == 1`, the function returns 1 indicating
+ * lap completion.
+ *
+ * Should be called in lap tracking logic, typically before incrementing lap count.
+ ******************************************************************************
+ */
 static uint8_t Is_Lap_Complete(void){
 	for (int index=0; index<sizeof(Checkpoints)/sizeof(Checkpoints[0]); index++){
 		if(Checkpoints[index].status == 0) return 0;
@@ -400,6 +452,19 @@ static uint8_t Is_Lap_Complete(void){
 	return 1;
 }
 
+/**
+ ******************************************************************************
+ * @brief  Clears all GPS checkpoint statuses
+ * @retval None
+ *
+ * This function resets the `status` field of each element in the `Checkpoints`
+ * array to 0, indicating that no checkpoints have been passed.
+ *
+ * Typical usage:
+ * - Call this after a completed lap to prepare for the next one.
+ * - Should be used in coordination with `Is_Lap_Complete()` and `Count_Lap()`.
+ ******************************************************************************
+ */
 static void Clear_Checkpoints(void){
 	for (int index=0; index<sizeof(Checkpoints)/sizeof(Checkpoints[0]); index++){
 		Checkpoints[index].status = 0;
