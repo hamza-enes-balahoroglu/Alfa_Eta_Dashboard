@@ -4,7 +4,7 @@
  * @brief          : Sending commands to Nextion display via UART - STM32 HAL compatible
  ******************************************************************************
  * @author         : Hamza Enes Balahoroğlu
- * @version        : v1.1
+ * @version        : v1.2
  * @date           : 09.06.2025
  *
  * @details
@@ -27,6 +27,10 @@
 
 
 #include "dashboard_controls.h"
+
+
+/* Private types -------------------------------------------------------------*/
+/* Private variables ---------------------------------------------------------*/
 
 /**
  * @brief Static Nextion command strings for various dashboard controls.
@@ -118,6 +122,22 @@ static NEX_CachedData _previousValues = {0};
  * @brief Nextion command terminator: 3-byte sequence required to mark end of commands.
  */
 static const uint8_t COMMAND_END[3] = {0xFF, 0xFF, 0xFF};
+/* Private Constants ---------------------------------------------------------*/
+/* Private macros ------------------------------------------------------------*/
+/* Private functions ---------------------------------------------------------*/
+/** @addtogroup DMAEx_Private_Functions
+  * @{
+  */
+static void Send_Nextion_Command(NEX_CommandID cmdID);
+static void Send_String_To_Nextion(char *str);
+static void Send_Nextion_Int(NEX_Int_Command_ID cmdID, int val);
+static HAL_StatusTypeDef Send_Nextion_Progress_Bar(NEX_Int_Command_ID cmdID, int val, int maxVal, int minVal, NEX_ProgressBar_Rotation reverseProgressBar);
+static void Command_Terminator(void);
+/**
+  * @}
+  */
+
+
 
 /**
   * @brief  Initializes the connection with the Nextion display (includes handshake).
@@ -128,7 +148,8 @@ static const uint8_t COMMAND_END[3] = {0xFF, 0xFF, 0xFF};
   *         (e.g., after MX_USARTx_UART_Init()). Otherwise, the `_uart` pointer
   *         will remain NULL and communication errors may occur.
   */
-HAL_StatusTypeDef Dashboard_Init(UART_HandleTypeDef *uart, NEX_Data *data){
+HAL_StatusTypeDef Dashboard_Init(UART_HandleTypeDef *uart, NEX_Data *data)
+{
 
     Dashboard_Bind(uart, data);
     return Nextion_Handshake(2000); // 2 seconds timeout for handshake
@@ -141,7 +162,8 @@ HAL_StatusTypeDef Dashboard_Init(UART_HandleTypeDef *uart, NEX_Data *data){
   * @param  data: Pointer to a user-defined NEX_Data structure with field addresses set.
   * @retval None
   */
-void Dashboard_Bind(UART_HandleTypeDef *uart, NEX_Data *data){
+void Dashboard_Bind(UART_HandleTypeDef *uart, NEX_Data *data)
+{
 	_uart = uart;
     _dashboard = data;
 }
@@ -157,7 +179,8 @@ void Dashboard_Bind(UART_HandleTypeDef *uart, NEX_Data *data){
   * @note   Must be called periodically inside the main loop or a task.
   * @retval HAL_OK on full success, HAL_ERROR if any UART failure occurs.
   */
-HAL_StatusTypeDef Dashboard_Refresh(void) {
+HAL_StatusTypeDef Dashboard_Refresh(void)
+{
 
 
 
@@ -284,7 +307,8 @@ HAL_StatusTypeDef Dashboard_Refresh(void) {
   * @note   Make sure `_uart` is correctly initialized before calling this function.
   *         Recommended to call after `MX_USARTx_UART_Init()` and before other Nextion commands.
   */
-HAL_StatusTypeDef Nextion_Handshake(uint32_t timeout){
+HAL_StatusTypeDef Nextion_Handshake(uint32_t timeout)
+{
     uint8_t rx_buffer[10]; // Buffer for receiving data
 
     for (int i = 0; i < 5; i++) {
@@ -337,7 +361,8 @@ static void Send_String_To_Nextion(char *str)
   * @param  val: Integer to inject into command string.
   * @retval None
   */
-static void Send_Nextion_Int(NEX_Int_Command_ID cmdID, int val){
+static void Send_Nextion_Int(NEX_Int_Command_ID cmdID, int val)
+{
     char command[20]; // 20-character command buffer
     const char *cmd = NEX_Int_Command[cmdID];
     sprintf(command, cmd, val);  // Create formatted string
@@ -364,7 +389,8 @@ static void Send_Nextion_Int(NEX_Int_Command_ID cmdID, int val){
   *
   * @note   Uses Map_Int() to scale the input value to 0-100.
   */
-static HAL_StatusTypeDef Send_Nextion_Progress_Bar(NEX_Int_Command_ID cmdID, int val, int maxVal, int minVal, NEX_ProgressBar_Rotation reverseProgressBar){
+static HAL_StatusTypeDef Send_Nextion_Progress_Bar(NEX_Int_Command_ID cmdID, int val, int maxVal, int minVal, NEX_ProgressBar_Rotation reverseProgressBar)
+{
     if (minVal <= val && val <=maxVal){
     	int mapVal;
     	if(reverseProgressBar == PROGRESS_BAR_REVERSE)
@@ -391,6 +417,7 @@ static HAL_StatusTypeDef Send_Nextion_Progress_Bar(NEX_Int_Command_ID cmdID, int
   *
   * @retval None
   */
-static void Command_Terminator(void){
+static void Command_Terminator(void)
+{
     HAL_UART_Transmit(_uart, (uint8_t*)COMMAND_END, sizeof(COMMAND_END), 100);
 }

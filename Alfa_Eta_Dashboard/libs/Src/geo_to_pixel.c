@@ -4,7 +4,7 @@
  * @brief          : Implementation of GPS to pixel coordinate conversion - STM32 HAL compatible
  ******************************************************************************
  * @author         : Hamza Enes Balahoroğlu
- * @version        : v1.3
+ * @version        : v1.4
  * @date           : 25.06.2025
  *
  * @details
@@ -79,15 +79,39 @@ static GPS_Checkpoint Checkpoints[3] = {
 	{.lat = 40.12345f, .lon = 29.12345f},
 };
 
-/**
- * @brief Number of checkpoints in the Checkpoints array.
- */
-#define NUM_CHECKPOINTS (sizeof(Checkpoints)/sizeof(Checkpoints[0]))
 
 /**
  * @brief Flag indicating whether a lap has started (1) or not (0).
  */
 static uint8_t Is_Lap_Started = 0;
+
+
+/* Private Constants ---------------------------------------------------------*/
+/* Private macros ------------------------------------------------------------*/
+
+/**
+ * @brief Number of checkpoints in the Checkpoints array.
+ */
+#define NUM_CHECKPOINTS (sizeof(Checkpoints)/sizeof(Checkpoints[0]))
+
+/* Private functions ---------------------------------------------------------*/
+/** @addtogroup DMAEx_Private_Functions
+  * @{
+  */
+static HAL_StatusTypeDef Read_GPS_Location(void);
+static float NMEA_To_Decimal(char *nmea);
+static void GPS_Filter(GPS_Data *gps);
+static float GPS_CalcDistance(float lat1, float lon1, float lat2, float lon2);
+static void Calculate_Geo_To_Pixel(void);
+static void Get_Map_Draw_Position(int gpsPixelX, int gpsPixelY);
+static void Calculate_Icon_Angle(void);
+static void Count_Lap(void);
+static uint8_t Is_Lap_Complete(void);
+static void Clear_Checkpoints(void);
+/**
+  * @}
+  */
+
 
 
 /**
@@ -97,7 +121,8 @@ static uint8_t Is_Lap_Started = 0;
   * @param  mapData: Pointer to map data structure.
   * @retval None
   */
-void Geo_To_Pixel_Init(UART_HandleTypeDef *uart, MapOffset *mapData){
+void Geo_To_Pixel_Init(UART_HandleTypeDef *uart, MapOffset *mapData)
+{
     Geo_To_Pixel_Bind(uart, mapData);
     Clear_Checkpoints();
 }
@@ -109,7 +134,8 @@ void Geo_To_Pixel_Init(UART_HandleTypeDef *uart, MapOffset *mapData){
   * @param  mapData: Pointer to map data structure to update pixel and icon angle values.
   * @retval None
   */
-void Geo_To_Pixel_Bind(UART_HandleTypeDef *uart, MapOffset *mapData){
+void Geo_To_Pixel_Bind(UART_HandleTypeDef *uart, MapOffset *mapData)
+{
     _uart = uart;
     _mapData = mapData;
 }
@@ -124,7 +150,8 @@ void Geo_To_Pixel_Bind(UART_HandleTypeDef *uart, MapOffset *mapData){
   *
   * @retval None
   */
-void Run_GeoPipeline(void){
+void Run_GeoPipeline(void)
+{
 
 	if(Read_GPS_Location() == HAL_OK){
 
@@ -149,7 +176,8 @@ void Run_GeoPipeline(void){
   *
   * @retval HAL_OK if a valid $GNRMC sentence is found and parsed, otherwise HAL_ERROR.
   */
-static HAL_StatusTypeDef Read_GPS_Location(void) {
+static HAL_StatusTypeDef Read_GPS_Location(void)
+{
     float latitude = 0.0f, longitude = 0.0f;
 
     // Clear GPS UART buffer
@@ -238,7 +266,8 @@ static HAL_StatusTypeDef Read_GPS_Location(void) {
   * @param  nmea: NMEA coordinate string (e.g. "4916.45" or "12311.12").
   * @retval Decimal degrees as float.
   */
-static float NMEA_To_Decimal(char *nmea) {
+static float NMEA_To_Decimal(char *nmea)
+{
     if (nmea == NULL) return 0.0f;
 
     int degrees = 0;
@@ -314,7 +343,8 @@ static float GPS_CalcDistance(float lat1, float lon1, float lat2, float lon2)
   *         Updates drawable position based on mapped pixel values.
   * @retval None
   */
-static void Calculate_Geo_To_Pixel(void){
+static void Calculate_Geo_To_Pixel(void)
+{
 	float mappedXf = Map_Float(_gpsData.filtered_lon, NW_lon, SE_lon, 0.00f , MAP_X_SIZE);
 	int mappedX = (int)mappedXf;
 
@@ -338,7 +368,8 @@ static void Calculate_Geo_To_Pixel(void){
   *
   * @retval None
   */
-static void Get_Map_Draw_Position(int gpsPixelX, int gpsPixelY) {
+static void Get_Map_Draw_Position(int gpsPixelX, int gpsPixelY)
+{
 	int pixelX, pixelY;
 
 	pixelX = ICON_X + (int)(ICON_WIDTH/2) - gpsPixelX;
@@ -377,7 +408,8 @@ static void Get_Map_Draw_Position(int gpsPixelX, int gpsPixelY) {
   *
   * @retval None
   */
-static void Calculate_Icon_Angle(void) {
+static void Calculate_Icon_Angle(void)
+{
 
 	if (_mapCachedData.PixelX != _mapData->PixelX || _mapCachedData.PixelY != _mapData->PixelY){
 
@@ -473,7 +505,8 @@ static void Count_Lap(void)
  * Should be called in lap tracking logic, typically before incrementing lap count.
  ******************************************************************************
  */
-static uint8_t Is_Lap_Complete(void){
+static uint8_t Is_Lap_Complete(void)
+{
 	for (int index=0; index<sizeof(Checkpoints)/sizeof(Checkpoints[0]); index++){
 		if(Checkpoints[index].status == 0) return 0;
 	}
@@ -493,7 +526,8 @@ static uint8_t Is_Lap_Complete(void){
  * - Should be used in coordination with `Is_Lap_Complete()` and `Count_Lap()`.
  ******************************************************************************
  */
-static void Clear_Checkpoints(void){
+static void Clear_Checkpoints(void)
+{
 	for (int index=0; index<sizeof(Checkpoints)/sizeof(Checkpoints[0]); index++){
 		Checkpoints[index].status = 0;
 	}
