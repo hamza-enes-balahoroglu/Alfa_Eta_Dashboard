@@ -43,9 +43,9 @@ const char *NEX_Command[] = {
     "con=1",
 
     /* Gear Display commands */
-    "pGr.pic=19",     // Drive gear icon
-    "pGr.pic=20",     // Neutral gear icon
-    "pGr.pic=21",     // Reverse gear icon
+    "pGr.pic=13",     // Drive gear icon
+    "pGr.pic=14",     // Neutral gear icon
+    "pGr.pic=15",     // Reverse gear icon
 
     /* Handbrake commands */
     "pHb.aph=127",    // Handbrake engaged (opaque)
