@@ -269,6 +269,36 @@ HAL_StatusTypeDef Dashboard_Refresh(void) {
 }
 
 /**
+  * @brief  Performs a handshake with the Nextion screen over UART.
+  *
+  *         The function attempts communication with the Nextion display by:
+  *         1. Listening for a 2-byte "OK" response from the display.
+  *         2. Sending a "con=1" (connection OK) command in response.
+  *         3. Repeating the process up to 5 times if necessary.
+  *
+  * @param  timeout: Timeout duration (in milliseconds) for each receive attempt.
+  *
+  * @retval HAL_OK    If an "OK" is received within the allowed number of attempts.
+  * @retval HAL_ERROR If no valid response is received.
+  *
+  * @note   Make sure `_uart` is correctly initialized before calling this function.
+  *         Recommended to call after `MX_USARTx_UART_Init()` and before other Nextion commands.
+  */
+HAL_StatusTypeDef Nextion_Handshake(uint32_t timeout){
+    uint8_t rx_buffer[10]; // Buffer for receiving data
+
+    for (int i = 0; i < 5; i++) {
+        HAL_UART_Receive(_uart, rx_buffer, 2, timeout);  // Wait for 2 bytes
+        Send_Nextion_Command(CONNECTION_OK);  // Send "con=1" command
+
+        if (rx_buffer[0] == 'O' && rx_buffer[1] == 'K') {
+            return HAL_OK;  // "OK" received from screen
+        }
+    }
+    return HAL_ERROR;  // No valid response received
+}
+
+/**
   * @brief  Sends a pre-defined command string to the Nextion display.
   *
   *         Uses the given command ID to look up the corresponding string in the
@@ -277,7 +307,7 @@ HAL_StatusTypeDef Dashboard_Refresh(void) {
   * @param  cmdID: Index of the command in the NEX_Command string array.
   * @retval None
   */
-void Send_Nextion_Command(NEX_CommandID cmdID)
+static void Send_Nextion_Command(NEX_CommandID cmdID)
 {
     Send_String_To_Nextion((char *)NEX_Command[cmdID]);
 }
@@ -291,7 +321,7 @@ void Send_Nextion_Command(NEX_CommandID cmdID)
   * @param  str: Command string to transmit (e.g., "page main").
   * @retval None
   */
-void Send_String_To_Nextion(char *str)
+static void Send_String_To_Nextion(char *str)
 {
     HAL_UART_Transmit(_uart, (uint8_t*)str, strlen(str), HAL_MAX_DELAY);
     Command_Terminator(); // Send 3-byte terminator at the end of the command
@@ -307,7 +337,7 @@ void Send_String_To_Nextion(char *str)
   * @param  val: Integer to inject into command string.
   * @retval None
   */
-void Send_Nextion_Int(NEX_Int_Command_ID cmdID, int val){
+static void Send_Nextion_Int(NEX_Int_Command_ID cmdID, int val){
     char command[20]; // 20-character command buffer
     const char *cmd = NEX_Int_Command[cmdID];
     sprintf(command, cmd, val);  // Create formatted string
@@ -334,7 +364,7 @@ void Send_Nextion_Int(NEX_Int_Command_ID cmdID, int val){
   *
   * @note   Uses Map_Int() to scale the input value to 0-100.
   */
-HAL_StatusTypeDef Send_Nextion_Progress_Bar(NEX_Int_Command_ID cmdID, int val, int maxVal, int minVal, NEX_ProgressBar_Rotation reverseProgressBar){
+static HAL_StatusTypeDef Send_Nextion_Progress_Bar(NEX_Int_Command_ID cmdID, int val, int maxVal, int minVal, NEX_ProgressBar_Rotation reverseProgressBar){
     if (minVal <= val && val <=maxVal){
     	int mapVal;
     	if(reverseProgressBar == PROGRESS_BAR_REVERSE)
@@ -363,34 +393,4 @@ HAL_StatusTypeDef Send_Nextion_Progress_Bar(NEX_Int_Command_ID cmdID, int val, i
   */
 static void Command_Terminator(void){
     HAL_UART_Transmit(_uart, (uint8_t*)COMMAND_END, sizeof(COMMAND_END), 100);
-}
-
-/**
-  * @brief  Performs a handshake with the Nextion screen over UART.
-  *
-  *         The function attempts communication with the Nextion display by:
-  *         1. Listening for a 2-byte "OK" response from the display.
-  *         2. Sending a "con=1" (connection OK) command in response.
-  *         3. Repeating the process up to 5 times if necessary.
-  *
-  * @param  timeout: Timeout duration (in milliseconds) for each receive attempt.
-  *
-  * @retval HAL_OK    If an "OK" is received within the allowed number of attempts.
-  * @retval HAL_ERROR If no valid response is received.
-  *
-  * @note   Make sure `_uart` is correctly initialized before calling this function.
-  *         Recommended to call after `MX_USARTx_UART_Init()` and before other Nextion commands.
-  */
-HAL_StatusTypeDef Nextion_Handshake(uint32_t timeout){
-    uint8_t rx_buffer[10]; // Buffer for receiving data
-
-    for (int i = 0; i < 5; i++) {
-        HAL_UART_Receive(_uart, rx_buffer, 2, timeout);  // Wait for 2 bytes
-        Send_Nextion_Command(CONNECTION_OK);  // Send "con=1" command
-
-        if (rx_buffer[0] == 'O' && rx_buffer[1] == 'K') {
-            return HAL_OK;  // "OK" received from screen
-        }
-    }
-    return HAL_ERROR;  // No valid response received
 }

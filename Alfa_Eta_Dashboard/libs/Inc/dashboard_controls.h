@@ -169,50 +169,17 @@ void Dashboard_Bind(UART_HandleTypeDef *uart, NEX_Data *data);
 
 /**
   * @brief  Refreshes the dashboard screen with the latest runtime data.
-  *         Sends only changed values to reduce UART traffic.
-  * @retval HAL_OK on success, HAL_ERROR on transmission failure.
+  * @retval HAL_StatusTypeDef
+  *         - HAL_OK: Transmission successful
+  *         - HAL_ERROR: UART transmission failed
+  *
+  * This function checks each field of the dashboard data and compares it with
+  * previously sent values. Only changed values are transmitted to minimize
+  * UART load and avoid redundant updates on the Nextion display.
+  *
+  * Should be called periodically in the main loop or task scheduler.
   */
 HAL_StatusTypeDef Dashboard_Refresh(void);
-
-/**
-  * @brief  Sends a pre-defined command to the Nextion display using command ID.
-  * @param  cmdID: Enum key for the Nextion command array (e.g., SET_GEAR_DRIVE).
-  */
-void Send_Nextion_Command(NEX_CommandID cmd);
-
-/**
-  * @brief  Sends a null-terminated command string to the Nextion display.
-  *         Automatically appends the 3-byte command terminator.
-  * @param  str: Command string (e.g., "page main").
-  */
-void Send_String_To_Nextion(char *str);
-
-/**
-  * @brief  Sends a formatted string with an integer value to the Nextion display.
-  *         Useful for numeric values like speed, voltage, etc.
-  * @param  cmdID: Enum key for integer-based commands with %d format.
-  * @param  val: Integer value to inject into command string.
-  */
-void Send_Nextion_Int(NEX_Int_Command_ID cmdID, int val);
-
-/**
-  * @brief  Sends a scaled progress bar value to the Nextion display.
-  *
-  *         Maps the input value from its actual range to 0-100 scale and sends it to the progress bar.
-  *         Supports normal and reversed progress bar directions.
-  *
-  * @param  cmdID:             Enum for the integer command string with a %d placeholder.
-  * @param  val:               Current input value.
-  * @param  maxVal:            Maximum expected input value.
-  * @param  minVal:            Minimum expected input value.
-  * @param  reverseProgressBar: Specifies progress direction:
-  *                             - PROGRESS_BAR_REVERSE (1): Progress bar decreases from 100 to 0.
-  *                             - PROGRESS_BAR_NO_REVERSE (0): Progress bar increases from 0 to 100.
-  *
-  * @retval HAL_OK if the value was within the expected range and sent successfully.
-  * @retval HAL_ERROR if the value was out of range.
-  */
-HAL_StatusTypeDef Send_Nextion_Progress_Bar(NEX_Int_Command_ID cmd, int val, int maxVal, int minVal, NEX_ProgressBar_Rotation reverseProgressBar);
 
 /**
   * @brief  Performs a UART-based handshake with the Nextion display.
@@ -226,21 +193,5 @@ HAL_StatusTypeDef Send_Nextion_Progress_Bar(NEX_Int_Command_ID cmd, int val, int
   * @retval HAL_ERROR If no valid response is received within given retries.
   */
 HAL_StatusTypeDef Nextion_Handshake(uint32_t timeout);
-
-/**
-  * @brief  Maps an integer input value from one range to another.
-  *
-  * @param  input:       Value to be mapped.
-  * @param  in_min:      Minimum of the input range.
-  * @param  in_max:      Maximum of the input range.
-  * @param  out_min:     Minimum of the output range.
-  * @param  out_max:     Maximum of the output range.
-  *
-  * @retval int:         Mapped output value scaled to target range.
-  *
-  * @note   This function is specific to integer values. For floating-point precision,
-  *         use a dedicated float version.
-  */
-int Map_Int(int input, int in_min, int in_max, int out_min, int out_max);
 
 #endif // DASHBOARD_CONTROLS
