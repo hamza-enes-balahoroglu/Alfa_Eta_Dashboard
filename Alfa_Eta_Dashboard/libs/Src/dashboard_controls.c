@@ -101,7 +101,7 @@ typedef enum {
  * These strings are sent as-is to the Nextion display to set icons,
  * visibility, or states for gears, handbrake, signals, warnings, and lights.
  */
-const char *NEX_Command[] = {
+static const char *NEX_Command[] = {
     /* Handshake command */
     "con=1",
 
@@ -138,7 +138,7 @@ const char *NEX_Command[] = {
  * These strings contain format specifiers for integer values (%d),
  * which will be replaced by actual data before sending.
  */
-const char *NEX_Int_Command[] = {
+static const char *NEX_Int_Command[] = {
 
     /* Speed Display */
     "nSd.val=%d",      // Speed number (km/h)
