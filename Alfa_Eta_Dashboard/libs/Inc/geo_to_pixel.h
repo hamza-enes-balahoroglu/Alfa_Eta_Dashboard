@@ -13,7 +13,7 @@
  * It includes GPS data filtering and icon angle calculation.
  *
  * - Designed for use with STM32CubeIDE and STM32 HAL library.
- * - The GPS module is expected to communicate at **9600 baudrate** via UART.
+ * - The GPS module is expected to communicate at **9600 Baud Rate** via UART.
  *   Ensure this matches your UART peripheral configuration.
  *
  * Mismatched baudrates can result in corrupted data or no GPS lock at all.
@@ -111,7 +111,7 @@ void Geo_To_Pixel_Bind(UART_HandleTypeDef *uart, MapOffset *mapData);
   *
   * @retval None
   */
-void Run_GeoPipeline(void);
+void Geo_To_Pixel_Run_Pipeline(void);
 
 
 #endif // GEO_TO_PIXEL

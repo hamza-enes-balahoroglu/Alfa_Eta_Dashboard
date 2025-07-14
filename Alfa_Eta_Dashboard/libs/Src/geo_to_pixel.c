@@ -150,7 +150,7 @@ void Geo_To_Pixel_Bind(UART_HandleTypeDef *uart, MapOffset *mapData)
   *
   * @retval None
   */
-void Run_GeoPipeline(void)
+void Geo_To_Pixel_Run_Pipeline(void)
 {
 
 	if(Read_GPS_Location() == HAL_OK){
