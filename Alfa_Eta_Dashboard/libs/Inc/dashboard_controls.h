@@ -13,7 +13,7 @@
  * display via UART using STM32 HAL libraries.
  *
  * IMPORTANT:
- * - Dashboard_Init() must be called AFTER MX_USARTx_UART_Init() in main.c
+ * - NEX_Init() must be called AFTER MX_USARTx_UART_Init() in main.c
  *   to ensure the UART handle is correctly initialized.
  * - The Nextion display must be configured to communicate at **115200 Baud Rate**.
  *   Make sure this setting matches both the UART peripheral and the Nextion editor config.
@@ -161,7 +161,7 @@ extern const char *NEX_Int_Command[];
   * @retval HAL status.
   * @note   Must be called after MX_USARTx_UART_Init().
   */
-HAL_StatusTypeDef Dashboard_Init(UART_HandleTypeDef *uart, NEX_Data *data);
+HAL_StatusTypeDef NEX_Init(UART_HandleTypeDef *uart, NEX_Data *data);
 
 /**
   * @brief  Initializes the dashboard pointer map.
@@ -171,7 +171,7 @@ HAL_StatusTypeDef Dashboard_Init(UART_HandleTypeDef *uart, NEX_Data *data);
   * @retval None
   * @note   Must be called once after setting up values.
   */
-void Dashboard_Bind(UART_HandleTypeDef *uart, NEX_Data *data);
+void NEX_Bind(UART_HandleTypeDef *uart, NEX_Data *data);
 
 /**
   * @brief  Refreshes the dashboard screen with the latest runtime data.
@@ -185,7 +185,7 @@ void Dashboard_Bind(UART_HandleTypeDef *uart, NEX_Data *data);
   *
   * Should be called periodically in the main loop or task scheduler.
   */
-HAL_StatusTypeDef Dashboard_Refresh(void);
+HAL_StatusTypeDef NEX_Refresh(void);
 
 /**
   * @brief  Performs a UART-based handshake with the Nextion display.
@@ -198,6 +198,6 @@ HAL_StatusTypeDef Dashboard_Refresh(void);
   * @retval HAL_OK    If handshake is successful.
   * @retval HAL_ERROR If no valid response is received within given retries.
   */
-HAL_StatusTypeDef Nextion_Handshake(uint32_t timeout);
+HAL_StatusTypeDef NEX_Handshake(uint32_t timeout);
 
 #endif // DASHBOARD_CONTROLS

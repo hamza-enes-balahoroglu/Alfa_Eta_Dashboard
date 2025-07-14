@@ -162,7 +162,7 @@ HAL_StatusTypeDef Dashboard_Init(UART_HandleTypeDef *uart, NEX_Data *data)
   * @param  data: Pointer to a user-defined NEX_Data structure with field addresses set.
   * @retval None
   */
-void Dashboard_Bind(UART_HandleTypeDef *uart, NEX_Data *data)
+void NEX_Bind(UART_HandleTypeDef *uart, NEX_Data *data)
 {
 	_uart = uart;
     _dashboard = data;
@@ -179,7 +179,7 @@ void Dashboard_Bind(UART_HandleTypeDef *uart, NEX_Data *data)
   * @note   Must be called periodically inside the main loop or a task.
   * @retval HAL_OK on full success, HAL_ERROR if any UART failure occurs.
   */
-HAL_StatusTypeDef Dashboard_Refresh(void)
+HAL_StatusTypeDef NEX_Refresh(void)
 {
 
 
@@ -307,7 +307,7 @@ HAL_StatusTypeDef Dashboard_Refresh(void)
   * @note   Make sure `_uart` is correctly initialized before calling this function.
   *         Recommended to call after `MX_USARTx_UART_Init()` and before other Nextion commands.
   */
-HAL_StatusTypeDef Nextion_Handshake(uint32_t timeout)
+HAL_StatusTypeDef NEX_Handshake(uint32_t timeout)
 {
     uint8_t rx_buffer[10]; // Buffer for receiving data
 
