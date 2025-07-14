@@ -131,22 +131,26 @@ typedef struct {
 
 /**
   * @brief  Initializes the dashboard UART communication.
-  * @param  uart: Pointer to the UART handler (e.g., &huart2).
+  * @param  uart: Pointer to the UART handle used for Nextion communication (e.g., &huart2).
   * @param  data: Pointer to a NEX_Data structure that holds all runtime value pointers.
-  * @retval HAL status.
-  * @note   Must be called after MX_USARTx_UART_Init().
+  * @retval HAL_StatusTypeDef
+  *         - HAL_OK: Initialization and handshake successful.
+  *         - HAL_ERROR: UART or data pointer is NULL, or handshake failed.
+  * @note   This function must be called after MX_USARTx_UART_Init().
+  *         It binds the provided pointers and performs an initial handshake with the display.
   */
+
 HAL_StatusTypeDef NEX_Init(UART_HandleTypeDef *uart, NEX_Data *data);
 
 /**
-  * @brief  Initializes the dashboard pointer map.
-  *         This function binds the internal pointers to user-defined runtime values.
-  * @param  uart: Pointer to the UART handler used for Nextion communication.
-  * @param  data: Pointer to a NEX_Data structure containing all relevant value addresses.
-  * @retval None
-  * @note   Must be called once after setting up values.
+  * @brief  Binds internal references to UART and dashboard data structures.
+  * @param  uart: Pointer to UART handle used for Nextion communication.
+  * @param  data: Pointer to the runtime data structure for dashboard updates.
+  * @retval HAL_StatusTypeDef
+  *         - HAL_OK: Binding was successful.
+  *         - HAL_ERROR: Provided pointers are NULL.
   */
-void NEX_Bind(UART_HandleTypeDef *uart, NEX_Data *data);
+HAL_StatusTypeDef NEX_Bind(UART_HandleTypeDef *uart, NEX_Data *data);
 
 /**
   * @brief  Refreshes the dashboard screen with the latest runtime data.

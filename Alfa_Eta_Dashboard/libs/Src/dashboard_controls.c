@@ -203,32 +203,40 @@ static void Command_Terminator(void);
 
 
 /**
-  * @brief  Initializes the connection with the Nextion display (includes handshake).
-  * @param  uart: Pointer to UART interface to use.
-  * @param  data: Pointer to a NEX_Data structure containing runtime variable addresses.
-  * @retval HAL_OK or HAL_ERROR depending on handshake result.
-  * @note   This function must be called *after* initializing the UART
-  *         (e.g., after MX_USARTx_UART_Init()). Otherwise, the `_uart` pointer
-  *         will remain NULL and communication errors may occur.
+  * @brief  Initializes the Nextion display by binding the UART handle and performing handshake.
+  * @param  uart: Pointer to the UART handle (typically huartX) for display communication.
+  * @param  data: Pointer to a NEX_Data structure containing runtime values to be displayed.
+  * @retval HAL_OK if initialization is successful, HAL_ERROR otherwise.
+  *
+  * @note   This function internally calls NEX_Bind() and NEX_Handshake().
+  *         If either step fails, the initialization is aborted.
+  *         Ensure that the UART peripheral is already initialized before calling this function.
   */
 HAL_StatusTypeDef NEX_Init(UART_HandleTypeDef *uart, NEX_Data *data)
 {
+    if(NEX_Bind(uart, data) == HAL_ERROR || NEX_Handshake(2000) == HAL_ERROR)
+    	return HAL_ERROR;
 
-    NEX_Bind(uart, data);
-    return NEX_Handshake(2000); // 2 seconds timeout for handshake
+    return HAL_OK;
 }
 
 /**
-  * @brief  Binds the dashboard data structure containing pointers to all runtime values.
-  *         Sets internal pointers for UART and data access.
-  * @param  uart: Pointer to the UART handler for communication.
-  * @param  data: Pointer to a user-defined NEX_Data structure with field addresses set.
-  * @retval None
+  * @brief  Binds the dashboard data structure and UART handle to internal static references.
+  * @param  uart: Pointer to an initialized UART handle used to communicate with the display.
+  * @param  data: Pointer to a NEX_Data structure containing pointers to displayable values.
+  * @retval HAL_OK if pointers are valid and binding is successful, HAL_ERROR otherwise.
+  *
+  * @note   This function must be called before using any display-related operations.
+  *         Passing NULL pointers will result in HAL_ERROR being returned.
   */
-void NEX_Bind(UART_HandleTypeDef *uart, NEX_Data *data)
+HAL_StatusTypeDef NEX_Bind(UART_HandleTypeDef *uart, NEX_Data *data)
 {
+	if(uart == NULL || data == NULL)
+		return HAL_ERROR;
+
 	_uart = uart;
     _dashboard = data;
+    return HAL_OK;
 }
 
 /**
