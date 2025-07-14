@@ -119,44 +119,59 @@ static void Clear_Checkpoints(void);
   */
 
 
-
 /**
-  * @brief  Initializes internal bindings for geolocation processing.
-  *         Currently calls Geo_To_Pixel_Bind with given parameters.
-  * @param  uart: UART interface handler for GPS data.
-  * @param  mapData: Pointer to map data structure.
-  * @retval None
-  */
-void Geo_To_Pixel_Init(UART_HandleTypeDef *uart, MapOffset *mapData)
-{
-    Geo_To_Pixel_Bind(uart, mapData);
-    Clear_Checkpoints();
-}
-
-/**
-  * @brief  Assigns UART interface and map data pointers to internal static variables.
-  *         These pointers are used in subsequent geolocation processing functions.
-  * @param  uart: UART handler used for GPS data reception.
-  * @param  mapData: Pointer to map data structure to update pixel and icon angle values.
-  * @retval None
-  */
-void Geo_To_Pixel_Bind(UART_HandleTypeDef *uart, MapOffset *mapData)
-{
-    _uart = uart;
-    _mapData = mapData;
-}
-
-/**
-  * @brief  Executes the full geolocation update sequence:
-  *         - Reads raw GPS data via UART
-  *         - Applies GPS filtering to reduce noise
-  *         - Converts filtered GPS coordinates to pixel positions on the map
-  *         - Calculates the orientation angle of the map icon based on movement
-  *         - Checks if a full lap is completed and updates lap count accordingly
+  * @brief  Initializes internal state for GPS to pixel conversion operations.
+  * @param  uart: Pointer to UART handle used to receive GPS data.
+  * @param  mapData: Pointer to MapOffset structure used for pixel and angle calculations.
+  * @retval HAL_StatusTypeDef
+  *         - HAL_OK: Bindings completed successfully.
+  *         - HAL_ERROR: Null pointers or binding failure.
   *
-  * @retval None
+  * @note   This function clears previous checkpoint states and binds internal references.
+  *         Must be called before any geolocation processing is performed.
   */
-void Geo_To_Pixel_Run_Pipeline(void)
+HAL_StatusTypeDef Geo_To_Pixel_Init(UART_HandleTypeDef *uart, MapOffset *mapData)
+{
+    Clear_Checkpoints();
+	return Geo_To_Pixel_Bind(uart, mapData);
+}
+
+/**
+  * @brief  Assigns UART and map data pointers to internal static variables.
+  * @param  uart: Pointer to UART handle used to receive GPS data.
+  * @param  mapData: Pointer to MapOffset structure that holds scaling and offset parameters.
+  * @retval HAL_StatusTypeDef
+  *         - HAL_OK: Pointers successfully stored.
+  *         - HAL_ERROR: Either pointer is NULL.
+  *
+  * @note   These internal references are required by all geolocation processing functions.
+  *         Ensure both pointers are valid and initialized before calling this function.
+  */
+HAL_StatusTypeDef Geo_To_Pixel_Bind(UART_HandleTypeDef *uart, MapOffset *mapData)
+{
+	if(uart == NULL || mapData == NULL)
+		return HAL_ERROR;
+
+	_uart = uart;
+    _mapData = mapData;
+    return HAL_OK;
+}
+
+/**
+  * @brief  Executes the full geolocation processing pipeline:
+  *         - Reads GPS location over UART
+  *         - Filters GPS signal to reduce noise
+  *         - Maps filtered coordinates to pixel values on screen
+  *         - Computes icon orientation angle based on movement direction
+  *         - Detects lap completion and increments lap count
+  * @retval HAL_StatusTypeDef
+  *         - HAL_OK: All pipeline stages completed successfully.
+  *         - HAL_ERROR: GPS data could not be read.
+  *
+  * @note   This function assumes internal bindings are already set via Geo_To_Pixel_Bind().
+  *         Should be called periodically (e.g., in a timer or main loop) to keep UI updated.
+  */
+HAL_StatusTypeDef Geo_To_Pixel_Run_Pipeline(void)
 {
 
 	if(Read_GPS_Location() == HAL_OK){
@@ -168,7 +183,11 @@ void Geo_To_Pixel_Run_Pipeline(void)
 		Calculate_Icon_Angle();
 
 		Count_Lap();
+
+		return HAL_OK;
 	}
+
+	return HAL_ERROR;
 }
 
 /**
@@ -256,9 +275,6 @@ static HAL_StatusTypeDef Read_GPS_Location(void)
 
             return HAL_OK; // Valid sentence processed, exit loop
         }
-
-        // Move pointer to search for next $GNRMC sentence
-        start += 6; // length of "$GNRMC"
     }
     return HAL_ERROR;
 }

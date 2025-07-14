@@ -93,31 +93,32 @@ typedef struct {
 
 
 /**
-  * @brief  Initializes the Geo to Pixel conversion module.
-  *         Sets up UART handler and map data pointers.
-  * @param  uart: Pointer to UART_HandleTypeDef for GPS communication.
-  * @param  mapData: Pointer to MapOffset structure to hold map coordinates.
-  * @retval None
+  * @brief  Initializes geolocation-to-pixel mapping functionality.
+  * @param  uart: Pointer to UART handle used for GPS data reception.
+  * @param  mapData: Pointer to map data structure for pixel mapping.
+  * @retval HAL_StatusTypeDef
+  *         - HAL_OK: Initialization successful.
+  *         - HAL_ERROR: Invalid parameters or binding failure.
   */
-void Geo_To_Pixel_Init(UART_HandleTypeDef *uart, MapOffset *mapData);
+HAL_StatusTypeDef Geo_To_Pixel_Init(UART_HandleTypeDef *uart, MapOffset *mapData);
 
 /**
-  * @brief  Binds UART handle and map data structure pointers for geolocation processing.
-  *         Must be called before starting geo-to-pixel calculations.
-  * @param  uart: Pointer to initialized UART_HandleTypeDef for GPS communication.
-  * @param  mapData: Pointer to MapOffset structure to store computed pixel positions and icon angle.
-  * @retval None
+  * @brief  Binds UART and map data pointers for geolocation operations.
+  * @param  uart: Pointer to UART handle used for GPS communication.
+  * @param  mapData: Pointer to map structure for coordinate transformation.
+  * @retval HAL_StatusTypeDef
+  *         - HAL_OK: Binding successful.
+  *         - HAL_ERROR: One or more pointers are NULL.
   */
-void Geo_To_Pixel_Bind(UART_HandleTypeDef *uart, MapOffset *mapData);
+HAL_StatusTypeDef Geo_To_Pixel_Bind(UART_HandleTypeDef *uart, MapOffset *mapData);
 
 /**
-  * @brief  Runs the complete geolocation processing pipeline.
-  *         Reads GPS data, filters it, converts coordinates to pixel values,
-  *         calculates icon angle for display, and checks lap completion.
-  *
-  * @retval None
+  * @brief  Runs the complete GPS-to-pixel update pipeline.
+  * @retval HAL_StatusTypeDef
+  *         - HAL_OK: Pipeline executed successfully.
+  *         - HAL_ERROR: GPS data read failed.
   */
-void Geo_To_Pixel_Run_Pipeline(void);
+HAL_StatusTypeDef Geo_To_Pixel_Run_Pipeline(void);
 
 
 #endif // GEO_TO_PIXEL
