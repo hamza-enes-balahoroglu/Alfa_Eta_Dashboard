@@ -13,9 +13,13 @@
  * display via UART using STM32 HAL libraries.
  *
  * IMPORTANT:
- * Dashboard_Init() must be called AFTER MX_USARTx_UART_Init() in main.c
- * to ensure the UART handle is correctly initialized. Calling it before
- * initialization may cause communication failures with the Nextion display.
+ * - Dashboard_Init() must be called AFTER MX_USARTx_UART_Init() in main.c
+ *   to ensure the UART handle is correctly initialized.
+ * - The Nextion display must be configured to communicate at **115200 baudrate**.
+ *   Make sure this setting matches both the UART peripheral and the Nextion editor config.
+ *
+ * Failing to match the baudrate or calling initialization before UART setup
+ * will cause communication failures or random garbage characters on screen.
  *
  ******************************************************************************
  */

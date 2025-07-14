@@ -12,6 +12,12 @@
  * GPS latitude and longitude data into pixel positions on a fixed map.
  * It includes GPS data filtering and icon angle calculation.
  *
+ * - Designed for use with STM32CubeIDE and STM32 HAL library.
+ * - The GPS module is expected to communicate at **9600 baudrate** via UART.
+ *   Ensure this matches your UART peripheral configuration.
+ *
+ * Mismatched baudrates can result in corrupted data or no GPS lock at all.
+ *
  * Designed for use with STM32CubeIDE and STM32 HAL library.
  *
  ******************************************************************************
