@@ -33,10 +33,16 @@
 #include <string.h>
 #include <stdio.h>
 
-#define NEX_SCREEN_SIZE_X 800
-#define NEX_SCREEN_SIZE_Y 480
+#define NEX_SCREEN_SIZE_X 800  /*!< Width of the Nextion display in pixels */
+#define NEX_SCREEN_SIZE_Y 480  /*!< Height of the Nextion display in pixels */
 
-#define NEX_HANDSHAKE_ATTEMPTS 10  /*!< Number of times the handshake command will be sent */
+#define NEX_HANDSHAKE_ATTEMPTS 10  /*!< Number of times the handshake command will be sent to ensure reliable UART connection */
+
+#define NEX_BATTERY_PROGRESS_BAR_MIN_VAL 0    /*!< Minimum value for the battery level progress bar */
+#define NEX_BATTERY_PROGRESS_BAR_MAX_VAL 100  /*!< Maximum value for the battery level progress bar */
+
+#define NEX_KW_PROGRESS_BAR_MIN_VAL 0         /*!< Minimum value for the power (kW) progress bar */
+#define NEX_KW_PROGRESS_BAR_MAX_VAL 5         /*!< Maximum value for the power (kW) progress bar */
 
 
 /**

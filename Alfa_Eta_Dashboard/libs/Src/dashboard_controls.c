@@ -245,8 +245,6 @@ void NEX_Bind(UART_HandleTypeDef *uart, NEX_Data *data)
 HAL_StatusTypeDef NEX_Refresh(void)
 {
 
-
-
     /* Numeric values */
     if (*_dashboard->speed != _previousValues.speed) {
         Send_Nextion_Int(SET_SPEED_COMMAND, *_dashboard->speed);
@@ -255,8 +253,9 @@ HAL_StatusTypeDef NEX_Refresh(void)
 
     if (*_dashboard->batteryValue != _previousValues.batteryValue) {
         Send_Nextion_Int(SET_BATTERY_NUMBER_COMMAND, *_dashboard->batteryValue);
-        HAL_StatusTypeDef a = Send_Nextion_Progress_Bar(SET_BATTERY_PROGRESS_BAR_COMMAND, *_dashboard->batteryValue, 100, 0, PROGRESS_BAR_NO_REVERSE);
-        if (a == HAL_ERROR)
+
+        if (Send_Nextion_Progress_Bar(SET_BATTERY_PROGRESS_BAR_COMMAND, *_dashboard->batteryValue,
+        		NEX_BATTERY_PROGRESS_BAR_MAX_VAL, NEX_BATTERY_PROGRESS_BAR_MIN_VAL, PROGRESS_BAR_NO_REVERSE) == HAL_ERROR)
              return HAL_ERROR;
         _previousValues.batteryValue = *_dashboard->batteryValue;
     }
@@ -264,7 +263,9 @@ HAL_StatusTypeDef NEX_Refresh(void)
 
     if (*_dashboard->powerKW != _previousValues.powerKW) {
         Send_Nextion_Int(SET_KW_NUMBER_COMMAND, *_dashboard->powerKW);
-        if (Send_Nextion_Progress_Bar(SET_KW_PROGRESS_BAR_COMMAND, *_dashboard->powerKW, 6, 0, PROGRESS_BAR_REVERSE) == HAL_ERROR)
+
+        if (Send_Nextion_Progress_Bar(SET_KW_PROGRESS_BAR_COMMAND, *_dashboard->powerKW,
+        		NEX_KW_PROGRESS_BAR_MAX_VAL, NEX_KW_PROGRESS_BAR_MIN_VAL, PROGRESS_BAR_REVERSE) == HAL_ERROR)
             return HAL_ERROR;
         _previousValues.powerKW = *_dashboard->powerKW;
     }
