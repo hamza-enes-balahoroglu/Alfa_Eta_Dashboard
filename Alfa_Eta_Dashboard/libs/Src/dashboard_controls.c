@@ -19,7 +19,7 @@
  * Designed for use with STM32CubeIDE and STM32 HAL libraries.
  *
  * @note
- * Dashboard_Init() must be called after MX_USARTx_UART_Init() to ensure
+ * NEX_Init() must be called after MX_USARTx_UART_Init() to ensure
  * correct UART communication. Otherwise, command transmission may fail.
  *
  ******************************************************************************
@@ -148,11 +148,11 @@ static void Command_Terminator(void);
   *         (e.g., after MX_USARTx_UART_Init()). Otherwise, the `_uart` pointer
   *         will remain NULL and communication errors may occur.
   */
-HAL_StatusTypeDef Dashboard_Init(UART_HandleTypeDef *uart, NEX_Data *data)
+HAL_StatusTypeDef NEX_Init(UART_HandleTypeDef *uart, NEX_Data *data)
 {
 
-    Dashboard_Bind(uart, data);
-    return Nextion_Handshake(2000); // 2 seconds timeout for handshake
+    NEX_Bind(uart, data);
+    return NEX_Handshake(2000); // 2 seconds timeout for handshake
 }
 
 /**
