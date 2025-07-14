@@ -45,27 +45,32 @@ UART_HandleTypeDef huart2;
 UART_HandleTypeDef huart3;
 
 /* USER CODE BEGIN PV */
-int count = 0;
+int count = 0; // Used to simulate changing speed and toggle signals
 
-
-HAL_StatusTypeDef Connection_Check;
+// Runtime variables representing vehicle data
 int speed,
 batteryValue,
 powerKW,
 packVoltage,
 maxVoltage,
 minVoltage,
-batteryTemp,
-gear,
-handbrake,
+batteryTemp;
+
+// Gear state (e.g., Drive, Neutral, Reverse)
+NEX_Gears gear;
+
+// Nextion states (ON/OFF)
+NEX_State handbrake,
 signalLeft ,
 signalRight,
 connWarn,
 battWarn,
 lights;
 
+// Map offset and positioning data
 MapOffset MapData;
 
+// Structure to hold pointers to all runtime variables for dashboard communication
 NEX_Data dashboardValues = {
      .speed 			=	&speed,
      .batteryValue		= 	&batteryValue,
@@ -135,7 +140,11 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
   // IMPOTANT : Call after UART initialization (e.g., MX_USARTX_UART_Init())
-  Connection_Check = Dashboard_Init(&huart2, &dashboardValues);
+
+  // Initialize the Nextion dashboard interface with UART and runtime data
+  NEX_Init(&huart2, &dashboardValues);
+
+  // Initialize the GPS-to-pixel conversion module for map tracking
   Geo_To_Pixel_Init(&huart3, &MapData);
 
 
@@ -147,30 +156,52 @@ int main(void)
   while (1)
   {
 
-	  batteryValue = 10;
-	  powerKW = 3;
-	  packVoltage = 5220;
-	  maxVoltage = 475;
-	  minVoltage = 160;
-	  batteryTemp = 2750;
-	  gear = 2;
-	  handbrake = 1;
 
-	  connWarn = 1;
-	  battWarn = 1;
-	  lights = 1;
+	  // Simulated sensor values for testing
+	  batteryValue = 10;       // Battery percentage (0-100%)
+	  powerKW = 3;             // Power in kilowatts
+	  packVoltage = 5220;      // Total battery voltage (in 00.01 V, e.g., 57.15 V)
+	  maxVoltage = 375;        // Max cell voltage (in 0.01 V, e.g., 3.75 V)
+	  minVoltage = 370;        // Min cell voltage (in 0.01 V, e.g., 3.70 V)
+	  batteryTemp = 2750;      // Battery temperature (in 0.01 °C, e.g., 27.50°C)
+
+	  // Simulate gear and vehicle states
+	  gear = NEX_GEAR_DRIVE;
+	  handbrake = NEX_STATE_ON;
+
+	  // Simulate warning lights
+	  connWarn = NEX_STATE_ON;
+	  battWarn = NEX_STATE_ON;
+	  lights = NEX_STATE_ON;
+
+	  // Update speed in a loop from 0 to 50
 	  speed = count;
 	  count = count+1;
-	  if(count>50) count = 0;
 
-	  Run_GeoPipeline();
+	  if(count%2 == 0)
+	  {
+		  signalLeft = NEX_STATE_ON;
+		  signalRight = NEX_STATE_ON;
+	  }
+	  else
+	  {
+		  signalLeft = NEX_STATE_OFF;
+		  signalRight = NEX_STATE_OFF;
+	  }
 
-	  // memset(gps_test, 0, GPS_BUFFER_SIZE);
-	  // HAL_UART_Receive(&huart3, (uint8_t *)gps_test, GPS_BUFFER_SIZE, 2000);
 
-	  Dashboard_Refresh();
+	  // Reset the counter after reaching 50
+	  if(count>50)
+		  count = 0;
 
-	  HAL_Delay(500);
+	  // Update map coordinates and calculate pixel position
+	  Geo_To_Pixel_Run_Pipeline();
+
+	  // Send updated values to the Nextion display
+	  NEX_Refresh();
+
+	  // Wait before next update (simulate 300ms refresh rate)
+	  HAL_Delay(300);
 
     /* USER CODE END WHILE */
 
