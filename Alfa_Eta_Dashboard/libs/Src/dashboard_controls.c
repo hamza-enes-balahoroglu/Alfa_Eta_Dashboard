@@ -124,8 +124,8 @@ static NEX_CachedData _previousValues = {0};
 static const uint8_t COMMAND_END[3] = {0xFF, 0xFF, 0xFF};
 /* Private Constants ---------------------------------------------------------*/
 /* Private macros ------------------------------------------------------------*/
-/* Private functions ---------------------------------------------------------*/
-/** @addtogroup DMAEx_Private_Functions
+/* Private function prototypes -----------------------------------------------*/
+/** @addtogroup Dashboard_Private_Functions
   * @{
   */
 static void Send_Nextion_Command(NEX_CommandID cmdID);

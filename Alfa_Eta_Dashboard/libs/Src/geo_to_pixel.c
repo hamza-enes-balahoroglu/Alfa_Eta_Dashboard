@@ -94,8 +94,8 @@ static uint8_t Is_Lap_Started = 0;
  */
 #define NUM_CHECKPOINTS (sizeof(Checkpoints)/sizeof(Checkpoints[0]))
 
-/* Private functions ---------------------------------------------------------*/
-/** @addtogroup DMAEx_Private_Functions
+/* Private function prototypes -----------------------------------------------*/
+/** @addtogroup Geo_To_Pixel_Private_Functions
   * @{
   */
 static HAL_StatusTypeDef Read_GPS_Location(void);
