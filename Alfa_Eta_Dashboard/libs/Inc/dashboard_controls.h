@@ -38,6 +38,43 @@
 
 #define NEX_HANDSHAKE_ATTEMPTS 10  /*!< Number of times the handshake command will be sent */
 
+
+/**
+ * @brief Enum for selecting gear states via dashboard.
+ *
+ * This enum maps each gear state to a specific value understood by
+ * the Nextion display. Instead of sending raw values (e.g., 0, 1, 2),
+ * using this enum improves readability and reduces confusion.
+ *
+ * Gear Values:
+ *     - NEUTRAL : 0x00 → Idle gear (no torque)
+ *     - DRIVE   : 0x01 → Forward gear
+ *     - REVERSE : 0x02 → Backward gear
+ */
+typedef enum {
+	NEX_GEAR_NEUTRAL   = 0x00U,  /*!< Neutral gear */
+	NEX_GEAR_DRIVE 	   = 0x01U,  /*!< Forward gear */
+    NEX_GEAR_REVERSE   = 0x02U   /*!< Reverse gear */
+} NEX_Gears;
+
+/**
+ * @brief  Represents binary ON/OFF states for dashboard indicators and controls.
+ *
+ * This enum is used for flags and controls that have two possible states:
+ * active (ON) or inactive (OFF). Commonly used for handbrake status,
+ * signal indicators, lights, battery warnings, and similar dashboard elements.
+ *
+ * @note
+ * Designed to improve code readability by replacing raw binary flags (1/0)
+ * with self-explanatory enum values.
+ *
+ ******************************************************************************
+ */
+typedef enum {
+    NEX_STATE_OFF = 0x00U,   /*!< Feature is inactive or turned off */
+    NEX_STATE_ON  = 0x01U    /*!< Feature is active or turned on */
+} NEX_State;
+
 /**
   * @brief  Structure holding pointers to all dashboard variables.
   *         Used for accessing real-time data.
@@ -51,13 +88,13 @@ typedef struct {
     int *minVoltage;         /*!< Minimum cell voltage */
     int *batteryTemp;        /*!< Battery temperature in °C */
     MapOffset *mapData;      /*!< Map informations */
-    int *gear;               /*!< Gear position: 0=N, 1=D, 2=R */
-    int *handbrake;          /*!< Handbrake: 0=Off, 1=On */
-    int *signalLeft;         /*!< Left signal: 0/1 */
-    int *signalRight;        /*!< Right signal: 0/1 */
-    int *connWarn;           /*!< Connection warning: 0/1 */
-    int *battWarn;           /*!< Battery warning: 0/1 */
-    int *lights;             /*!< Lights: 0=Off, 1=On */
+    NEX_Gears *gear;               /*!< Gear position: 0=N, 1=D, 2=R */
+    NEX_State *handbrake;          /*!< Handbrake: 0=Off, 1=On */
+    NEX_State *signalLeft;         /*!< Left signal: 0/1 */
+    NEX_State *signalRight;        /*!< Right signal: 0/1 */
+    NEX_State *connWarn;           /*!< Connection warning: 0/1 */
+    NEX_State *battWarn;           /*!< Battery warning: 0/1 */
+    NEX_State *lights;             /*!< Lights: 0=Off, 1=On */
 } NEX_Data;
 
 
@@ -74,13 +111,13 @@ typedef struct {
     int minVoltage;
     int batteryTemp;
     MapOffset mapData;
-    int gear;
-    int handbrake;
-    int signalLeft;
-    int signalRight;
-    int connWarn;
-    int battWarn;
-    int lights;
+    NEX_Gears gear;
+    NEX_State handbrake;
+    NEX_State signalLeft;
+    NEX_State signalRight;
+    NEX_State connWarn;
+    NEX_State battWarn;
+    NEX_State lights;
 } NEX_CachedData;
 
 
@@ -145,7 +182,6 @@ typedef enum {
     PROGRESS_BAR_REVERSE          = 0x01U, /*!< Progress bar from full to empty */
     PROGRESS_BAR_NO_REVERSE       = 0x02U  /*!< Progress bar from empty to full */
 } NEX_ProgressBar_Rotation;
-
 
 /*--------------------- External Variables ---------------------*/
 extern const char *NEX_Command[];
