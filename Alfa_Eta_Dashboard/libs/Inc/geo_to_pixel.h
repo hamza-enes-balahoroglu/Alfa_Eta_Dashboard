@@ -4,8 +4,8 @@
  * @brief          : GPS coordinate to pixel conversion module - STM32 HAL compatible
  ******************************************************************************
  * @author         : Hamza Enes Balahoroğlu
- * @version        : v1.3
- * @date           : 25.06.2025
+ * @version        : v1.5
+ * @date           : 14.07.2025
  *
  * @note
  * This header file provides functions and definitions for converting
@@ -16,10 +16,16 @@
  * - The GPS module is expected to communicate at **9600 Baud Rate** via UART.
  *   Ensure this matches your UART peripheral configuration.
  *
- * Mismatched baudrates can result in corrupted data or no GPS lock at all.
+ * Mismatched baud rates can result in corrupted data or no GPS lock at all.
  *
  * Designed for use with STM32CubeIDE and STM32 HAL library.
  *
+ *           _  __        ______ _______
+ *     /\   | |/ _|      |  ____|__   __|/\
+ *    /  \  | | |_ __ _  | |__     | |  /  \
+ *   / /\ \ | |  _/ _` | |  __|    | | / /\ \
+ *  / ____ \| | || (_| | | |____   | |/ ____ \
+ * /_/    \_\_|_| \__,_| |______|  |_/_/    \_\
  ******************************************************************************
  */
 

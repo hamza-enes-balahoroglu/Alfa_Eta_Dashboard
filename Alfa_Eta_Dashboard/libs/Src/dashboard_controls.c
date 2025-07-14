@@ -4,8 +4,8 @@
  * @brief          : Sending commands to Nextion display via UART - STM32 HAL compatible
  ******************************************************************************
  * @author         : Hamza Enes Balahoroğlu
- * @version        : v1.2
- * @date           : 09.06.2025
+ * @version        : v1.3
+ * @date           : 14.07.2025
  *
  * @details
  * This file contains the implementation of helper functions to interface with
@@ -22,6 +22,12 @@
  * NEX_Init() must be called after MX_USARTx_UART_Init() to ensure
  * correct UART communication. Otherwise, command transmission may fail.
  *
+ *           _  __        ______ _______
+ *     /\   | |/ _|      |  ____|__   __|/\
+ *    /  \  | | |_ __ _  | |__     | |  /  \
+ *   / /\ \ | |  _/ _` | |  __|    | | / /\ \
+ *  / ____ \| | || (_| | | |____   | |/ ____ \
+ * /_/    \_\_|_| \__,_| |______|  |_/_/    \_\
  ******************************************************************************
  */
 

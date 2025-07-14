@@ -4,8 +4,8 @@
  * @brief          : Implementation of GPS to pixel coordinate conversion - STM32 HAL compatible
  ******************************************************************************
  * @author         : Hamza Enes Balahoroğlu
- * @version        : v1.4
- * @date           : 25.06.2025
+ * @version        : v1.5
+ * @date           : 14.07.2025
  *
  * @details
  * This file contains the implementation of functions for handling GPS data and
@@ -23,6 +23,12 @@
  * GPS-related functions should be called after UART and GPS module initialization.
  * Ensure the coordinate mapping limits (MAP_X/Y_MIN/MAX) match the map's resolution.
  *
+ *           _  __        ______ _______
+ *     /\   | |/ _|      |  ____|__   __|/\
+ *    /  \  | | |_ __ _  | |__     | |  /  \
+ *   / /\ \ | |  _/ _` | |  __|    | | / /\ \
+ *  / ____ \| | || (_| | | |____   | |/ ____ \
+ * /_/    \_\_|_| \__,_| |______|  |_/_/    \_\
  ******************************************************************************
  */
 

@@ -4,8 +4,8 @@
  * @brief          : Nextion display control library - STM32 HAL compatible
  ******************************************************************************
  * @author         : Hamza Enes Balahoroglu
- * @version        : v1.1
- * @date           : 09.06.2025
+ * @version        : v1.3
+ * @date           : 14.07.2025
  *
  * @note
  * This header file is intended to be used in STM32CubeIDE projects.
@@ -18,9 +18,15 @@
  * - The Nextion display must be configured to communicate at **115200 Baud Rate**.
  *   Make sure this setting matches both the UART peripheral and the Nextion editor config.
  *
- * Failing to match the baudrate or calling initialization before UART setup
+ * Failing to match the baud rate or calling initialization before UART setup
  * will cause communication failures or random garbage characters on screen.
  *
+ *           _  __        ______ _______
+ *     /\   | |/ _|      |  ____|__   __|/\
+ *    /  \  | | |_ __ _  | |__     | |  /  \
+ *   / /\ \ | |  _/ _` | |  __|    | | / /\ \
+ *  / ____ \| | || (_| | | |____   | |/ ____ \
+ * /_/    \_\_|_| \__,_| |______|  |_/_/    \_\
  ******************************************************************************
  */
 
