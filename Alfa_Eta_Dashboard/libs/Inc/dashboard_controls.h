@@ -15,7 +15,7 @@
  * IMPORTANT:
  * - Dashboard_Init() must be called AFTER MX_USARTx_UART_Init() in main.c
  *   to ensure the UART handle is correctly initialized.
- * - The Nextion display must be configured to communicate at **115200 baudrate**.
+ * - The Nextion display must be configured to communicate at **115200 Baud Rate**.
  *   Make sure this setting matches both the UART peripheral and the Nextion editor config.
  *
  * Failing to match the baudrate or calling initialization before UART setup
@@ -35,6 +35,8 @@
 
 #define NEX_SCREEN_SIZE_X 800
 #define NEX_SCREEN_SIZE_Y 480
+
+#define NEX_HANDSHAKE_ATTEMPTS 10  /*!< Number of times the handshake command will be sent */
 
 /**
   * @brief  Structure holding pointers to all dashboard variables.

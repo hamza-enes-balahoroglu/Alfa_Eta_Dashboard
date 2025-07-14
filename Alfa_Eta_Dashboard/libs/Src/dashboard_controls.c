@@ -311,7 +311,7 @@ HAL_StatusTypeDef Nextion_Handshake(uint32_t timeout)
 {
     uint8_t rx_buffer[10]; // Buffer for receiving data
 
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < NEX_HANDSHAKE_ATTEMPTS; i++) {
         HAL_UART_Receive(_uart, rx_buffer, 2, timeout);  // Wait for 2 bytes
         Send_Nextion_Command(CONNECTION_OK);  // Send "con=1" command
 
