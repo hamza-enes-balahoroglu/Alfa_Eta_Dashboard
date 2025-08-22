@@ -80,9 +80,10 @@ static GPS_Data _gpsData = {
  * along with latitude and longitude coordinates.
  */
 static GPS_Checkpoint Checkpoints[3] = {
-    {.lat = 40.12345f, .lon = 29.12345f},  // Start point
-	{.lat = 40.12345f, .lon = 29.12345f},
-	{.lat = 40.12345f, .lon = 29.12345f},
+    {.status = 0, .lat = 40.78743065f, .lon = 29.45139832f},  // Start point
+	{.status = 0, .lat = 40.78848651f, .lon = 29.45713582f},
+	{.status = 0, .lat = 40.7872771f, .lon = 29.4576436f},
+	{.status = 0, .lat = 40.7857818f, .lon = 29.4539718f}
 };
 
 

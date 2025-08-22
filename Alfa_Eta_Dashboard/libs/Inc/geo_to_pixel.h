@@ -57,10 +57,10 @@
 
 
 /*--------------------- Geo Boundaries ---------------------*/
-#define NW_lat 40.809190303f     /*!< Latitude of the top-left (NW) corner of the map */
-#define NW_lon 29.353690785f     /*!< Longitude of the top-left (NW) corner of the map */
-#define SE_lat 40.80401074f      /*!< Latitude of the bottom-right (SE) corner of the map */
-#define SE_lon 29.36103314f      /*!< Longitude of the bottom-right (SE) corner of the map */
+#define NW_lat 40.791284217f     /*!< Latitude of the top-left (NW) corner of the map */
+#define NW_lon 29.447577362f     /*!< Longitude of the top-left (NW) corner of the map */
+#define SE_lat 40.782318197f      /*!< Latitude of the bottom-right (SE) corner of the map */
+#define SE_lon 29.460412478f      /*!< Longitude of the bottom-right (SE) corner of the map */
 
 #define GPS_BUFFER_SIZE 100      /*!< Size of UART GPS data buffer */
 
